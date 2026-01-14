@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Hacking Terminal</title>
+
+<style>
+/* BACKGROUND EFFECT */
+body {
+  margin: 0;
+  background: radial-gradient(circle at top, #001a00, #000);
+  color: #00ff66;
+  font-family: monospace;
+  overflow: hidden;
+}
+
+/* MATRIX ANIMATION */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  background:
+    repeating-linear-gradient(
+      0deg,
+      rgba(0,255,0,0.05),
+      rgba(0,255,0,0.05) 1px,
+      transparent 1px,
+      transparent 3px
+    );
+  animation: scan 6s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes scan {
+  from { background-position-y: 0; }
+  to { background-position-y: 100px; }
+}
+
+/* HEADER */
+#header {
+  padding: 10px;
+  border-bottom: 1px solid #00ff66;
+  text-align: center;
+  font-size: 20px;
+  text-shadow: 0 0 10px #00ff66;
+}
+
+/* TERMINAL */
+#terminal {
+  height: 80vh;
+  padding: 10px;
+  overflow-y: auto;
+  white-space: pre-wrap;
+  text-shadow: 0 0 6px rgba(0,255,100,0.6);
+}
+
+/* INPUT BAR */
+#inputBar {
+  border-top: 1px solid #00ff66;
+  padding: 10px;
+}
+
+/* INPUT */
+#cmd {
+  width: 100%;
+  background: transparent;
+  color: #00ff66;
+  border: none;
+  outline: none;
+  font-family: monospace;
+  font-size: 16px;
+  caret-color: #00ff66;
+}
+
+/* BLINKING CURSOR EFFECT */
+#cmd::placeholder {
+  color: rgba(0,255,100,0.4);
+}
+
+/* SCROLLBAR */
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #00ff66;
+}
+</style>
+</head>
+
+<body>
+
+<div id="header">Hacking Terminal</div>
+
+<div id="terminal">
+SYSTEM ONLINE
+STATUS: LOCKED
+Enter username using: name &lt;yourname&gt;
+</div>
+
+<div id="inputBar">
+  <input id="cmd" placeholder="type command here..." autofocus>
+</div>
+
+<script>
+const terminal = document.getElementById("terminal");
+const input = document.getElementById("cmd");
+
+let username = "user";
+let waitingUsername = true;
+let locked = true;
+let waitingPassword = false;
+let online = true;
+
+let connectedComputer = null;
+let hackedFiles = [];
+let downloadedFiles = [];
+
+const PASSWORD = "access123";
+
+const computers = {
+  "office-pc": ["emails.txt", "payroll.xls", "notes.doc"],
+  "server-node": ["config.sys", "users.db", "keys.key"],
+  "backup-core": ["archives.zip", "logs.old"]
+};
+
+function print(t) {
+  terminal.textContent += "\n" + t;
+  terminal.scrollTop = terminal.scrollHeight;
+}
+
+function prompt() {
+  return connectedComputer
+    ? `${username}@${connectedComputer}> `
+    : `${username}@terminal> `;
+}
+
+input.addEventListener("keyup", e => {
+  if (e.key !== "Enter") return;
+
+  const raw = input.value.trim();
+  input.value = "";
+  if (!raw) return;
+
+  const cmd = raw.toLowerCase();
+  print(prompt() + raw);
+
+  if (waitingUsername) {
+    if (cmd.startsWith("name ")) {
+      username = raw.substring(5);
+      waitingUsername = false;
+      print("Welcome, " + username);
+      print("Type: unlock");
+    } else {
+      print("Use: name <yourname>");
+    }
+    return;
+  }
+
+  if (cmd === "unlock") {
+    waitingPassword = true;
+    print("Enter: password <password>");
+    return;
+  }
+
+  if (waitingPassword) {
+    if (cmd.startsWith("password ")) {
+      if (raw.substring(9) === PASSWORD) {
+        locked = false;
+        waitingPassword = false;
+        print("ACCESS GRANTED");
+        print("Type help");
+      } else {
+        print("ACCESS DENIED");
+      }
+    }
+    return;
+  }
+
+  if (locked) {
+    print("TERMINAL LOCKED");
+    return;
+  }
+
+  if (!online && !["online","help","clear","network map"].includes(cmd)) {
+    print("SYSTEM OFFLINE");
+    return;
+  }
+
+  if (cmd === "help") {
+    print("General Commands:");
+    print("computers, connect <name>, disconnect");
+    print("network map");
+    print("online, offline, clear");
+    print("Type: help computer");
+    return;
+  }
+
+  if (cmd === "help computer") {
+    print("Computer Commands:");
+    print("ls, cat <file>");
+    print("hack <file>, download <file>");
+    print("downloads");
+    return;
+  }
+
+  if (cmd === "network map") {
+    print("NETWORK MAP");
+    print("[terminal]");
+    print("   |");
+    print("[office-pc] ---- [server-node]");
+    print("                   |");
+    print("               [backup-core]");
+    if (connectedComputer) print("CONNECTED TO: " + connectedComputer);
+    return;
+  }
+
+  if (cmd === "computers") {
+    Object.keys(computers).forEach(c => print("- " + c));
+    return;
+  }
+
+  if (cmd.startsWith("connect ")) {
+    const name = raw.substring(8);
+    if (!computers[name]) print("Computer not found");
+    else {
+      connectedComputer = name;
+      hackedFiles = [];
+      print("Connected to " + name);
+    }
+    return;
+  }
+
+  if (cmd === "disconnect") {
+    connectedComputer = null;
+    print("Disconnected");
+    return;
+  }
+
+  if (cmd === "ls") {
+    if (!connectedComputer) print("Not connected");
+    else computers[connectedComputer].forEach(f => print("- " + f));
+    return;
+  }
+
+  if (cmd.startsWith("hack ")) {
+    if (!connectedComputer) {
+      print("ERROR: No computer connected");
+      return;
+    }
+    const file = raw.substring(5);
+    if (!computers[connectedComputer].includes(file)) {
+      print("ERROR: File not found");
+      return;
+    }
+    if (hackedFiles.includes(file)) {
+      print("File already hacked");
+      return;
+    }
+    hackedFiles.push(file);
+    print("Hacking " + file + "...");
+    print("ACCESS GRANTED");
+    return;
+  }
+
+  if (cmd.startsWith("download ")) {
+    const file = raw.substring(9);
+    if (!hackedFiles.includes(file)) {
+      print("File not hacked");
+      return;
+    }
+    downloadedFiles.push(file);
+    print("Downloaded: " + file);
+    return;
+  }
+
+  if (cmd === "downloads") {
+    if (!downloadedFiles.length) print("No downloads");
+    else downloadedFiles.forEach(f => print("- " + f));
+    return;
+  }
+
+  if (cmd === "offline") {
+    online = false;
+    print("SYSTEM OFFLINE");
+    return;
+  }
+
+  if (cmd === "online") {
+    online = true;
+    print("SYSTEM ONLINE");
+    return;
+  }
+
+  if (cmd === "clear") {
+    terminal.textContent = "";
+    return;
+  }
+
+  print("UNKNOWN COMMAND");
+});
+</script>
+
+</body>
+</html>
