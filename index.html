@@ -16,18 +16,29 @@ body {
   overflow: hidden;
   /* Default terminal text */
 #terminal {
+/* Default desktop sizes */
+#terminal {
   height: 70vh;
   padding: 10px;
   overflow-y: auto;
   white-space: pre-wrap;
-  font-size: 16px; /* default for desktop */
+  font-size: 16px;
 }
 
-/* Mobile screens */
+#cmd {
+  font-size: 16px;
+}
+
+/* Mobile-friendly */
 @media screen and (max-width: 600px) {
   #terminal {
-    font-size: 30px; /* bigger text on phones */
+    font-size: 5vw; /* 5% of viewport width */
   }
+
+  #cmd {
+    font-size: 5vw; /* input box scales too */
+  }
+}
 
   #cmd {
     font-size: 20px; /* input box text bigger */
