@@ -5,18 +5,11 @@
 <title>Hacking Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="icon" type="image/png" href="favicon.png">
-
 <style>
-:root {
-  --bg: #000;
-  --fg: #00ff66;
-}
-
 body {
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
+  background: radial-gradient(circle at top, #001a00, #000);
+  color: #00ff66;
   font-family: monospace;
   overflow: hidden;
 }
@@ -24,46 +17,30 @@ body {
 #header {
   text-align: center;
   padding: 12px;
-  font-size: 24px;
-  border-bottom: 1px solid var(--fg);
+  font-size: 22px;
+  border-bottom: 1px solid #00ff66;
 }
 
 #terminal {
   height: 70vh;
-  padding: 12px;
+  padding: 10px;
   overflow-y: auto;
   white-space: pre-wrap;
-  font-size: 20px;
-  line-height: 1.4;
 }
 
 #inputBar {
-  border-top: 1px solid var(--fg);
+  border-top: 1px solid #00ff66;
   padding: 10px;
 }
 
 #cmd {
   width: 100%;
   background: black;
-  color: var(--fg);
+  color: #00ff66;
   border: none;
   outline: none;
-  font-size: 20px;
+  font-size: 16px;
   font-family: monospace;
-}
-
-/* Rainbow animation */
-@keyframes rainbow {
-  0% { color: red; }
-  20% { color: orange; }
-  40% { color: yellow; }
-  60% { color: green; }
-  80% { color: blue; }
-  100% { color: violet; }
-}
-
-.rainbow {
-  animation: rainbow 2s linear infinite;
 }
 </style>
 </head>
@@ -79,16 +56,31 @@ body {
 <script>
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("cmd");
-const root = document.documentElement;
 
-function print(text = "") {
-  terminal.innerHTML += text + "<br>";
+let username = "user";
+let waitingName = true;
+let waitingPass = false;
+let locked = true;
+let connected = null;
+
+const PASSWORD = "access123";
+
+const computers = {
+  "office-pc": ["emails.txt", "payroll.xls"],
+  "server-node": ["users.db", "keys.key"]
+};
+
+function print(text) {
+  terminal.textContent += text + "\n";
   terminal.scrollTop = terminal.scrollHeight;
 }
 
+function prompt() {
+  return connected ? `${username}@${connected}> ` : `${username}@terminal> `;
+}
+
 print("SYSTEM ONLINE");
-print("Type 'help' for commands");
-print();
+print("Enter username: name <yourname>");
 
 input.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
@@ -98,13 +90,46 @@ input.addEventListener("keydown", e => {
   if (!raw) return;
 
   const cmd = raw.toLowerCase();
-  print("&gt; " + raw);
+  print(prompt() + raw);
 
-  /* BASIC COMMANDS */
+  if (waitingName) {
+    if (cmd.startsWith("name ")) {
+      username = raw.substring(5);
+      waitingName = false;
+      print("Welcome " + username);
+      print("Type unlock");
+    }
+    return;
+  }
+
+  if (cmd === "unlock") {
+    waitingPass = true;
+    print("Enter: password <password>");
+    return;
+  }
+
+  if (waitingPass) {
+    if (cmd.startsWith("password ")) {
+      if (raw.substring(9) === PASSWORD) {
+        locked = false;
+        waitingPass = false;
+        print("ACCESS GRANTED");
+        print("Type help");
+      } else {
+        print("ACCESS DENIED");
+      }
+    }
+    return;
+  }
+
+  if (locked) {
+    print("TERMINAL LOCKED");
+    return;
+  }
+
   if (cmd === "help") {
     print("Commands:");
-    print("help, status, clear, about");
-    print("theme green | blue | red | rainbow");
+    print("computers, connect <name>, status, clear");
     return;
   }
 
@@ -114,60 +139,28 @@ input.addEventListener("keydown", e => {
     return;
   }
 
-  if (cmd === "about") {
-    print("Fake Hacking Screen");
-    print("Created for fun & games 😎");
+  if (cmd === "computers") {
+    Object.keys(computers).forEach(c => print("- " + c));
+    return;
+  }
+
+  if (cmd.startsWith("connect ")) {
+    const c = raw.substring(8);
+    if (!computers[c]) {
+      print("Computer not found");
+    } else {
+      connected = c;
+      print("Connected to " + c);
+    }
     return;
   }
 
   if (cmd === "clear") {
-    terminal.innerHTML = "";
+    terminal.textContent = "";
     return;
   }
 
-  /* THEMES */
-  if (cmd.startsWith("theme ")) {
-    const theme = cmd.split(" ")[1];
-
-    document.body.classList.remove("rainbow");
-
-    if (theme === "green") {
-      root.style.setProperty("--bg", "#000");
-      root.style.setProperty("--fg", "#00ff66");
-    } else if (theme === "blue") {
-      root.style.setProperty("--bg", "#000814");
-      root.style.setProperty("--fg", "#4cc9f0");
-    } else if (theme === "red") {
-      root.style.setProperty("--bg", "#140000");
-      root.style.setProperty("--fg", "#ff4d4d");
-    } else if (theme === "rainbow") {
-      document.body.classList.add("rainbow");
-    } else {
-      print("Unknown theme");
-      return;
-    }
-
-    print("Theme changed to " + theme);
-    return;
-  }
-
-  /* EASTER EGGS */
-  if (cmd === "merry christmas") {
-    print("🎄 Merry Christmas, Hacker!");
-    return;
-  }
-
-  if (cmd === "happy hacking!") {
-    print("😎 Happy Hacking! Stay curious.");
-    return;
-  }
-
-  if (cmd === "hack the planet") {
-    print("🌍 HACK THE PLANET!");
-    return;
-  }
-
-  print("Unknown command");
+  print("UNKNOWN COMMAND");
 });
 </script>
 
