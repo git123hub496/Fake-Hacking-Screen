@@ -1,114 +1,69 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
 <meta charset="UTF-8">
 <title>Hacking Terminal</title>
-  <link rel="icon" type="image/png" href="favicon.png">
-</head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" type="image/png" href="favicon.png">
 
 <style>
-/* BACKGROUND EFFECT */
+:root {
+  --bg: #000;
+  --fg: #00ff66;
+}
+
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #001a00, #000);
-  color: #00ff66;
+  background: var(--bg);
+  color: var(--fg);
   font-family: monospace;
   overflow: hidden;
-  /* Default terminal text */
-#terminal {
-/* Default desktop sizes */
+}
+
+#header {
+  text-align: center;
+  padding: 12px;
+  font-size: 24px;
+  border-bottom: 1px solid var(--fg);
+}
+
 #terminal {
   height: 70vh;
-  padding: 10px;
+  padding: 12px;
   overflow-y: auto;
   white-space: pre-wrap;
-  font-size: 16px;
-}
-
-}
-
-/* Mobile-friendly */
-@media screen and (max-width: 600px) {
-  #terminal {
-    font-size: 5vw; /* 5% of viewport width */
-  }
-
-  #cmd {
-    font-size: 5vw; /* input box scales too */
-  }
-}
-  }
-}
-
-/* MATRIX ANIMATION */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background:
-    repeating-linear-gradient(
-      0deg,
-      rgba(0,255,0,0.05),
-      rgba(0,255,0,0.05) 1px,
-      transparent 1px,
-      transparent 3px
-    );
-  animation: scan 6s linear infinite;
-  pointer-events: none;
-}
-
-@keyframes scan {
-  from { background-position-y: 0; }
-  to { background-position-y: 100px; }
-}
-
-/* HEADER */
-#header {
-  padding: 10px;
-  border-bottom: 1px solid #00ff66;
-  text-align: center;
   font-size: 20px;
-  text-shadow: 0 0 10px #00ff66;
+  line-height: 1.4;
 }
 
-/* TERMINAL */
-#terminal {
-  height: 80vh;
-  padding: 10px;
-  overflow-y: auto;
-  white-space: pre-wrap;
-  text-shadow: 0 0 6px rgba(0,255,100,0.6);
-}
-
-/* INPUT BAR */
 #inputBar {
-  border-top: 1px solid #00ff66;
+  border-top: 1px solid var(--fg);
   padding: 10px;
 }
 
-/* INPUT */
 #cmd {
   width: 100%;
-  background: transparent;
-  color: #00ff66;
+  background: black;
+  color: var(--fg);
   border: none;
   outline: none;
+  font-size: 20px;
   font-family: monospace;
-  font-size: 16px;
-  caret-color: #00ff66;
 }
 
-/* BLINKING CURSOR EFFECT */
-#cmd::placeholder {
-  color: rgba(0,255,100,0.4);
+/* Rainbow animation */
+@keyframes rainbow {
+  0% { color: red; }
+  20% { color: orange; }
+  40% { color: yellow; }
+  60% { color: green; }
+  80% { color: blue; }
+  100% { color: violet; }
 }
 
-/* SCROLLBAR */
-::-webkit-scrollbar {
-  width: 6px;
-}
-::-webkit-scrollbar-thumb {
-  background: #00ff66;
+.rainbow {
+  animation: rainbow 2s linear infinite;
 }
 </style>
 </head>
@@ -116,51 +71,26 @@ body::before {
 <body>
 
 <div id="header">Hacking Terminal</div>
-
-<div id="terminal">
-SYSTEM ONLINE
-STATUS: LOCKED
-Enter username using: name &lt;yourname&gt;
-</div>
-
+<div id="terminal"></div>
 <div id="inputBar">
-  <input id="cmd" placeholder="type command here..." autofocus>
+  <input id="cmd" placeholder="type command..." autofocus>
 </div>
 
 <script>
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("cmd");
+const root = document.documentElement;
 
-let username = "user";
-let waitingUsername = true;
-let locked = true;
-let waitingPassword = false;
-let online = true;
-
-let connectedComputer = null;
-let hackedFiles = [];
-let downloadedFiles = [];
-
-const PASSWORD = "access123";
-
-const computers = {
-  "office-pc": ["emails.txt", "payroll.xls", "notes.doc"],
-  "server-node": ["config.sys", "users.db", "keys.key"],
-  "backup-core": ["archives.zip", "logs.old"]
-};
-
-function print(t) {
-  terminal.textContent += "\n" + t;
+function print(text = "") {
+  terminal.innerHTML += text + "<br>";
   terminal.scrollTop = terminal.scrollHeight;
 }
 
-function prompt() {
-  return connectedComputer
-    ? `${username}@${connectedComputer}> `
-    : `${username}@terminal> `;
-}
+print("SYSTEM ONLINE");
+print("Type 'help' for commands");
+print();
 
-input.addEventListener("keyup", e => {
+input.addEventListener("keydown", e => {
   if (e.key !== "Enter") return;
 
   const raw = input.value.trim();
@@ -168,161 +98,76 @@ input.addEventListener("keyup", e => {
   if (!raw) return;
 
   const cmd = raw.toLowerCase();
-  print(prompt() + raw);
+  print("&gt; " + raw);
 
-  if (waitingUsername) {
-    if (cmd.startsWith("name ")) {
-      username = raw.substring(5);
-      waitingUsername = false;
-      print("Welcome, " + username);
-      print("Type: unlock");
-    } else {
-      print("Use: name <yourname>");
-    }
-    return;
-  }
-
-  if (cmd === "unlock") {
-    waitingPassword = true;
-    print("Enter: password <password>");
-    return;
-  }
-
-  if (waitingPassword) {
-    if (cmd.startsWith("password ")) {
-      if (raw.substring(9) === PASSWORD) {
-        locked = false;
-        waitingPassword = false;
-        print("ACCESS GRANTED");
-        print("Type help");
-      } else {
-        print("ACCESS DENIED");
-      }
-    }
-    return;
-  }
-
-  if (locked) {
-    print("TERMINAL LOCKED");
-    return;
-  }
-
-  if (!online && !["online","help","clear","network map"].includes(cmd)) {
-    print("SYSTEM OFFLINE");
-    return;
-  }
-
+  /* BASIC COMMANDS */
   if (cmd === "help") {
-    print("General Commands:");
-    print("computers, connect <name>, disconnect");
-    print("network map");
-    print("online, offline, clear");
-    print("Type: help computer");
+    print("Commands:");
+    print("help, status, clear, about");
+    print("theme green | blue | red | rainbow");
     return;
   }
 
-  if (cmd === "help computer") {
-    print("Computer Commands:");
-    print("ls, cat <file>");
-    print("hack <file>, download <file>");
-    print("downloads");
+  if (cmd === "status") {
+    print("SYSTEM STATUS: STABLE");
+    print("TRACE LEVEL: 0%");
     return;
   }
 
-  if (cmd === "network map") {
-    print("NETWORK MAP");
-    print("[terminal]");
-    print("   |");
-    print("[office-pc] ---- [server-node]");
-    print("                   |");
-    print("               [backup-core]");
-    if (connectedComputer) print("CONNECTED TO: " + connectedComputer);
-    return;
-  }
-
-  if (cmd === "computers") {
-    Object.keys(computers).forEach(c => print("- " + c));
-    return;
-  }
-
-  if (cmd.startsWith("connect ")) {
-    const name = raw.substring(8);
-    if (!computers[name]) print("Computer not found");
-    else {
-      connectedComputer = name;
-      hackedFiles = [];
-      print("Connected to " + name);
-    }
-    return;
-  }
-
-  if (cmd === "disconnect") {
-    connectedComputer = null;
-    print("Disconnected");
-    return;
-  }
-
-  if (cmd === "ls") {
-    if (!connectedComputer) print("Not connected");
-    else computers[connectedComputer].forEach(f => print("- " + f));
-    return;
-  }
-
-  if (cmd.startsWith("hack ")) {
-    if (!connectedComputer) {
-      print("ERROR: No computer connected");
-      return;
-    }
-    const file = raw.substring(5);
-    if (!computers[connectedComputer].includes(file)) {
-      print("ERROR: File not found");
-      return;
-    }
-    if (hackedFiles.includes(file)) {
-      print("File already hacked");
-      return;
-    }
-    hackedFiles.push(file);
-    print("Hacking " + file + "...");
-    print("ACCESS GRANTED");
-    return;
-  }
-
-  if (cmd.startsWith("download ")) {
-    const file = raw.substring(9);
-    if (!hackedFiles.includes(file)) {
-      print("File not hacked");
-      return;
-    }
-    downloadedFiles.push(file);
-    print("Downloaded: " + file);
-    return;
-  }
-
-  if (cmd === "downloads") {
-    if (!downloadedFiles.length) print("No downloads");
-    else downloadedFiles.forEach(f => print("- " + f));
-    return;
-  }
-
-  if (cmd === "offline") {
-    online = false;
-    print("SYSTEM OFFLINE");
-    return;
-  }
-
-  if (cmd === "online") {
-    online = true;
-    print("SYSTEM ONLINE");
+  if (cmd === "about") {
+    print("Fake Hacking Screen");
+    print("Created for fun & games 😎");
     return;
   }
 
   if (cmd === "clear") {
-    terminal.textContent = "";
+    terminal.innerHTML = "";
     return;
   }
 
-  print("UNKNOWN COMMAND");
+  /* THEMES */
+  if (cmd.startsWith("theme ")) {
+    const theme = cmd.split(" ")[1];
+
+    document.body.classList.remove("rainbow");
+
+    if (theme === "green") {
+      root.style.setProperty("--bg", "#000");
+      root.style.setProperty("--fg", "#00ff66");
+    } else if (theme === "blue") {
+      root.style.setProperty("--bg", "#000814");
+      root.style.setProperty("--fg", "#4cc9f0");
+    } else if (theme === "red") {
+      root.style.setProperty("--bg", "#140000");
+      root.style.setProperty("--fg", "#ff4d4d");
+    } else if (theme === "rainbow") {
+      document.body.classList.add("rainbow");
+    } else {
+      print("Unknown theme");
+      return;
+    }
+
+    print("Theme changed to " + theme);
+    return;
+  }
+
+  /* EASTER EGGS */
+  if (cmd === "merry christmas") {
+    print("🎄 Merry Christmas, Hacker!");
+    return;
+  }
+
+  if (cmd === "happy hacking!") {
+    print("😎 Happy Hacking! Stay curious.");
+    return;
+  }
+
+  if (cmd === "hack the planet") {
+    print("🌍 HACK THE PLANET!");
+    return;
+  }
+
+  print("Unknown command");
 });
 </script>
 
