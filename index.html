@@ -159,6 +159,22 @@ input.addEventListener("keydown", e => {
     terminal.textContent = "";
     return;
   }
+if (cmd === "merry christmas") {
+  print("🎄 Merry Christmas, " + username + "!");
+  print("SYSTEM CHEER LEVEL: 100%");
+  return;
+}
+if (cmd === "happy hacking!") {
+  print("😎 Happy Hacking!");
+  print("Remember: this terminal is fake 😉");
+  return;
+}
+if (cmd === "hack the planet") {
+  print("🌍 HACK THE PLANET");
+  print(">>> ACCESSING GLOBAL NODE...");
+  setTimeout(() => print(">>> ACCESS ACCEPTED, HACKING COMPLETE, YOU WON!!! ❤"), 1200);
+  return;
+}
 
   print("UNKNOWN COMMAND");
 });
