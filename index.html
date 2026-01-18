@@ -7,10 +7,16 @@
 <link rel="icon" type="image/png" href="favicon.png">
 
 <style>
+:root {
+  --bg1: #001a00;
+  --bg2: #000000;
+  --fg: #00ff66;
+}
+
 body {
   margin: 0;
-  background: radial-gradient(circle at top, #001a00, #000);
-  color: #00ff66;
+  background: radial-gradient(circle at top, var(--bg1), var(--bg2));
+  color: var(--fg);
   font-family: monospace;
   overflow: hidden;
 }
@@ -78,6 +84,10 @@ function print(text) {
 
 function prompt() {
   return connected ? `${username}@${connected}> ` : `${username}@terminal> `;
+  function setTheme(bg1, bg2, fg) {
+  document.documentElement.style.setProperty("--bg1", bg1);
+  document.documentElement.style.setProperty("--bg2", bg2);
+  document.documentElement.style.setProperty("--fg", fg);
 }
 
 print("SYSTEM ONLINE");
@@ -131,6 +141,9 @@ input.addEventListener("keydown", e => {
   if (cmd === "help") {
     print("Commands:");
     print("computers, connect <name>, status, clear");
+    print("Themes:");
+    print("green | blue | red");
+
     return;
   }
 
@@ -174,6 +187,23 @@ if (cmd === "hack the planet") {
   print("🌍 HACK THE PLANET");
   print(">>> ACCESSING GLOBAL NODE...");
   setTimeout(() => print(">>> ACCESS ACCEPTED, HACKING COMPLETE, YOU WON!!! ❤"), 1200);
+  return;
+}
+if (cmd === "theme green") {
+  setTheme("#001a00", "#000000", "#00ff66");
+  print("Theme set to green");
+  return;
+}
+
+if (cmd === "theme blue") {
+  setTheme("#00101a", "#000814", "#4cc9f0");
+  print("Theme set to blue");
+  return;
+}
+
+if (cmd === "theme red") {
+  setTheme("#1a0000", "#140000", "#ff4d4d");
+  print("Theme set to red");
   return;
 }
 
