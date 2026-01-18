@@ -7,19 +7,6 @@
 
 <style>
 :root {
-  --bg1: #001a00;
-  --bg2: #000000;
-  --fg: #00ff66;
-}
-  
-<div id="endScreen">
-  <div id="endText">
-    <h1>YOU WON!!!</h1>
-    <p>MISSION COMPLETE</p>
-  </div>
-</div>
-  
-:root {
   --bg: radial-gradient(circle at top, #001a00, #000);
   --fg: #00ff66;
   --border: #00ff66;
@@ -37,7 +24,7 @@ body {
   text-align: center;
   padding: 12px;
   font-size: 22px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 2px solid var(--border);
 }
 
 #terminal {
@@ -45,12 +32,10 @@ body {
   padding: 10px;
   overflow-y: auto;
   white-space: pre-wrap;
-  font-size: 18px;
-  color: var(--fg);
 }
 
 #inputBar {
-  border-top: 1px solid var(--border);
+  border-top: 2px solid var(--border);
   padding: 10px;
 }
 
@@ -60,43 +45,9 @@ body {
   color: var(--fg);
   border: none;
   outline: none;
-  font-size: 18px;
+  font-size: 16px;
   font-family: monospace;
 }
-  #endScreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: radial-gradient(circle, #000, #000000ee);
-  display: none;
-  align-items: center;
-  justify-content: center;
-  z-index: 9999;
-}
-
-#endText {
-  text-align: center;
-  color: var(--fg);
-  animation: glow 1.5s infinite alternate;
-}
-
-#endText h1 {
-  font-size: 48px;
-  margin: 0;
-}
-
-#endText p {
-  font-size: 22px;
-  margin-top: 10px;
-}
-
-@keyframes glow {
-  from { text-shadow: 0 0 10px var(--fg); }
-  to   { text-shadow: 0 0 30px var(--fg); }
-}
-
 </style>
 </head>
 
@@ -117,42 +68,41 @@ let username = "user";
 let waitingName = true;
 let waitingPass = false;
 let locked = true;
-let connected = null;
-let adminMode = false;
+let isAdmin = false;
 
 const PASSWORD = "access123";
 
-function print(text = "") {
+function print(text) {
   terminal.textContent += text + "\n";
   terminal.scrollTop = terminal.scrollHeight;
 }
 
 function prompt() {
-  return `${username}@terminal> `;
+  return isAdmin
+    ? `ADMIN@terminal# `
+    : `${username}@terminal> `;
 }
 
-function setTheme(bg1, bg2, fg) {
-  document.documentElement.style.setProperty("--bg1", bg1);
-  document.documentElement.style.setProperty("--bg2", bg2);
-  document.documentElement.style.setProperty("--fg", fg);
+/* THEMES */
+function setTheme(theme) {
+  if (theme === "green") {
+    document.documentElement.style.setProperty("--bg","radial-gradient(circle at top, #001a00, #000)");
+    document.documentElement.style.setProperty("--fg","#00ff66");
+    document.documentElement.style.setProperty("--border","#00ff66");
+  }
+  if (theme === "red") {
+    document.documentElement.style.setProperty("--bg","radial-gradient(circle at top, #200000, #000)");
+    document.documentElement.style.setProperty("--fg","#ff3333");
+    document.documentElement.style.setProperty("--border","#ff3333");
+  }
+  if (theme === "blue") {
+    document.documentElement.style.setProperty("--bg","radial-gradient(circle at top, #001020, #000)");
+    document.documentElement.style.setProperty("--fg","#33aaff");
+    document.documentElement.style.setProperty("--border","#33aaff");
+  }
 }
 
-function runHack(target) {
-  print("INITIATING HACK...");
-  print("TARGET: " + target);
-  setTimeout(() => print("BYPASSING SECURITY..."), 800);
-  setTimeout(() => print("ACCESS GRANTED"), 1600);
-  setTimeout(() => {
-  print("YOU WON!!!");
-  showEndScreen();
-}, 2200);
-  
-  function showEndScreen() {
-  document.getElementById("endScreen").style.display = "flex";
-  input.disabled = true;
-}
-
-/* BOOT */
+/* START */
 print("SYSTEM ONLINE");
 print("Enter username: name <yourname>");
 
@@ -166,20 +116,21 @@ input.addEventListener("keydown", e => {
   const cmd = raw.toLowerCase();
   print(prompt() + raw);
 
-  /* NAME ENTRY */
+  /* USERNAME */
   if (waitingName) {
     if (cmd.startsWith("name ")) {
       username = raw.substring(5);
       waitingName = false;
 
       if (username.toLowerCase() === "admin") {
-        adminMode = true;
+        isAdmin = true;
         header.textContent = "ADMIN Hacking Terminal";
         document.title = "Admin Hacking Terminal";
-        print("ADMIN MODE ENABLED");
+        print("ADMIN USER DETECTED");
+      } else {
+        print("Welcome " + username);
       }
 
-      print("Welcome " + username);
       print("Type unlock");
     }
     return;
@@ -215,64 +166,53 @@ input.addEventListener("keydown", e => {
   if (cmd === "help") {
     print("Commands:");
     print("status, clear");
-    print("theme green | blue | red");
-    if (adminMode) {
+    print("theme green | red | blue");
+    if (isAdmin) {
       print("ADMIN COMMANDS:");
       print("hack nsc");
-      print("hack global");
-      print("hack military");
-      print("hack terminal <target>");
+      print("hack global terminal");
+      print("hack military terminal");
+      print("hack terminal <name>");
+      print("beat");
     }
-    return;
-  }
-
-  /* THEMES */
-  if (cmd === "theme green") {
-    setTheme("#001a00", "#000000", "#00ff66");
-    return;
-  }
-
-  if (cmd === "theme blue") {
-    setTheme("#00101a", "#000814", "#4cc9f0");
-    return;
-  }
-
-  if (cmd === "theme red") {
-    setTheme("#1a0000", "#140000", "#ff4d4d");
-    return;
-  }
-
-  /* ADMIN HACKS */
-  if (adminMode && cmd === "hack nsc") {
-    runHack("National Space Company");
-    return;
-  }
-
-  if (adminMode && cmd === "hack global") {
-    runHack("Global Terminal");
-    return;
-  }
-
-  if (adminMode && cmd === "hack military") {
-    runHack("Military Terminal");
-    return;
-  }
-
-  if (adminMode && cmd.startsWith("hack terminal ")) {
-    const target = raw.substring(14);
-    runHack(target);
     return;
   }
 
   /* STATUS */
   if (cmd === "status") {
     print("SYSTEM STATUS: STABLE");
+    print("TRACE LEVEL: 0%");
     return;
   }
 
   /* CLEAR */
   if (cmd === "clear") {
     terminal.textContent = "";
+    return;
+  }
+
+  /* THEMES */
+  if (cmd.startsWith("theme ")) {
+    setTheme(cmd.split(" ")[1]);
+    print("Theme applied");
+    return;
+  }
+
+  /* ADMIN HACKS */
+  if (isAdmin && cmd.startsWith("hack ")) {
+    const target = raw.substring(5);
+    print("HACKING " + target.toUpperCase() + "...");
+    setTimeout(() => print("ACCESS GRANTED"), 800);
+    return;
+  }
+
+  /* END SCREEN */
+  if (isAdmin && cmd === "beat") {
+    terminal.textContent = "";
+    print("=================================");
+    print("      YOU WON!!!");
+    print("   SYSTEM DOMINATED");
+    print("=================================");
     return;
   }
 
