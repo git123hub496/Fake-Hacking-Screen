@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Hacking Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="favicon.png">
 
 <style>
 :root {
@@ -25,7 +24,7 @@ body {
   text-align: center;
   padding: 12px;
   font-size: 22px;
-  border-bottom: 1px solid #00ff66;
+  border-bottom: 1px solid var(--fg);
 }
 
 #terminal {
@@ -33,20 +32,21 @@ body {
   padding: 10px;
   overflow-y: auto;
   white-space: pre-wrap;
+  font-size: 18px;
 }
 
 #inputBar {
-  border-top: 1px solid #00ff66;
+  border-top: 1px solid var(--fg);
   padding: 10px;
 }
 
 #cmd {
   width: 100%;
   background: black;
-  color: #00ff66;
+  color: var(--fg);
   border: none;
   outline: none;
-  font-size: 16px;
+  font-size: 18px;
   font-family: monospace;
 }
 </style>
@@ -77,19 +77,24 @@ const computers = {
   "server-node": ["users.db", "keys.key"]
 };
 
-function print(text) {
+function print(text = "") {
   terminal.textContent += text + "\n";
   terminal.scrollTop = terminal.scrollHeight;
 }
 
 function prompt() {
-  return connected ? `${username}@${connected}> ` : `${username}@terminal> `;
-  function setTheme(bg1, bg2, fg) {
+  return connected
+    ? `${username}@${connected}> `
+    : `${username}@terminal> `;
+}
+
+function setTheme(bg1, bg2, fg) {
   document.documentElement.style.setProperty("--bg1", bg1);
   document.documentElement.style.setProperty("--bg2", bg2);
   document.documentElement.style.setProperty("--fg", fg);
 }
 
+/* BOOT */
 print("SYSTEM ONLINE");
 print("Enter username: name <yourname>");
 
@@ -103,6 +108,7 @@ input.addEventListener("keydown", e => {
   const cmd = raw.toLowerCase();
   print(prompt() + raw);
 
+  /* LOGIN */
   if (waitingName) {
     if (cmd.startsWith("name ")) {
       username = raw.substring(5);
@@ -138,21 +144,48 @@ input.addEventListener("keydown", e => {
     return;
   }
 
+  /* HELP */
   if (cmd === "help") {
     print("Commands:");
-    print("computers, connect <name>, status, clear");
-    print("Themes:");
-    print("green | blue | red");
-
+    print("status, clear");
+    print("network, scan, missions");
+    print("computers, connect <name>");
+    print("files, download <file>");
+    print("help computer");
+    print("theme green | blue | red");
     return;
   }
 
+  /* STATUS */
   if (cmd === "status") {
     print("SYSTEM STATUS: STABLE");
     print("TRACE LEVEL: 0%");
     return;
   }
 
+  /* NETWORK */
+  if (cmd === "network") {
+    print("NETWORK MAP:");
+    print("[LOCAL] ── [ROUTER] ── [TARGET]");
+    return;
+  }
+
+  if (cmd === "scan") {
+    print("Scanning network...");
+    setTimeout(() => print("Scan complete. 3 nodes found."), 1200);
+    return;
+  }
+
+  /* MISSIONS */
+  if (cmd === "missions") {
+    print("ACTIVE MISSIONS:");
+    print("- Scan network");
+    print("- Download files");
+    print("- Disable target");
+    return;
+  }
+
+  /* COMPUTERS */
   if (cmd === "computers") {
     Object.keys(computers).forEach(c => print("- " + c));
     return;
@@ -169,43 +202,70 @@ input.addEventListener("keydown", e => {
     return;
   }
 
+  if (cmd === "help computer") {
+    print("COMPUTER COMMANDS:");
+    print("computer status");
+    print("computer hack");
+    print("computer shutdown");
+    return;
+  }
+
+  if (cmd === "computer status") {
+    print("Computer online. Security level: LOW");
+    return;
+  }
+
+  if (cmd === "computer hack") {
+    print("Hacking computer...");
+    setTimeout(() => print("Computer compromised."), 2000);
+    return;
+  }
+
+  if (cmd === "computer shutdown") {
+    print("Computer offline.");
+    return;
+  }
+
+  /* FILES */
+  if (cmd === "files") {
+    if (!connected) {
+      print("Not connected to a computer");
+      return;
+    }
+    computers[connected].forEach(f => print("- " + f));
+    return;
+  }
+
+  if (cmd.startsWith("download ")) {
+    print("Downloading file...");
+    setTimeout(() => print("Download complete."), 1500);
+    return;
+  }
+
+  /* THEMES */
+  if (cmd === "theme green") {
+    setTheme("#001a00", "#000000", "#00ff66");
+    print("Theme set to green");
+    return;
+  }
+
+  if (cmd === "theme blue") {
+    setTheme("#00101a", "#000814", "#4cc9f0");
+    print("Theme set to blue");
+    return;
+  }
+
+  if (cmd === "theme red") {
+    setTheme("#1a0000", "#140000", "#ff4d4d");
+    print("Theme set to red");
+    return;
+  }
+
+  /* CLEAR */
   if (cmd === "clear") {
     terminal.textContent = "";
     return;
   }
-if (cmd === "merry christmas") {
-  print("🎄 Merry Christmas, " + username + "!");
-  print("SYSTEM CHEER LEVEL: 100%");
-  return;
-}
-if (cmd === "happy hacking!") {
-  print("😎 Happy Hacking!");
-  print("Remember: this terminal is fake 😉");
-  return;
-}
-if (cmd === "hack the planet") {
-  print("🌍 HACK THE PLANET");
-  print(">>> ACCESSING GLOBAL NODE...");
-  setTimeout(() => print(">>> ACCESS ACCEPTED, HACKING COMPLETE, YOU WON!!! ❤"), 1200);
-  return;
-}
-if (cmd === "theme green") {
-  setTheme("#001a00", "#000000", "#00ff66");
-  print("Theme set to green");
-  return;
-}
-
-if (cmd === "theme blue") {
-  setTheme("#00101a", "#000814", "#4cc9f0");
-  print("Theme set to blue");
-  return;
-}
-
-if (cmd === "theme red") {
-  setTheme("#1a0000", "#140000", "#ff4d4d");
-  print("Theme set to red");
-  return;
-}
 
   print("UNKNOWN COMMAND");
 });
