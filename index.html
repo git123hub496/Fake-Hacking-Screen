@@ -33,7 +33,7 @@ body {
   overflow-y: auto;
   white-space: pre-wrap;
   font-size: 18px;
-  color: var(--fg); /* ← THIS FIXES IT */
+  color: var(--fg);
 }
 
 #inputBar {
@@ -64,19 +64,16 @@ body {
 <script>
 const terminal = document.getElementById("terminal");
 const input = document.getElementById("cmd");
+const header = document.getElementById("header");
 
 let username = "user";
 let waitingName = true;
 let waitingPass = false;
 let locked = true;
 let connected = null;
+let adminMode = false;
 
 const PASSWORD = "access123";
-
-const computers = {
-  "office-pc": ["emails.txt", "payroll.xls"],
-  "server-node": ["users.db", "keys.key"]
-};
 
 function print(text = "") {
   terminal.textContent += text + "\n";
@@ -84,15 +81,21 @@ function print(text = "") {
 }
 
 function prompt() {
-  return connected
-    ? `${username}@${connected}> `
-    : `${username}@terminal> `;
+  return `${username}@terminal> `;
 }
 
 function setTheme(bg1, bg2, fg) {
   document.documentElement.style.setProperty("--bg1", bg1);
   document.documentElement.style.setProperty("--bg2", bg2);
   document.documentElement.style.setProperty("--fg", fg);
+}
+
+function runHack(target) {
+  print("INITIATING HACK...");
+  print("TARGET: " + target);
+  setTimeout(() => print("BYPASSING SECURITY..."), 800);
+  setTimeout(() => print("ACCESS GRANTED"), 1600);
+  setTimeout(() => print("YOU WON!!!"), 2200);
 }
 
 /* BOOT */
@@ -109,17 +112,26 @@ input.addEventListener("keydown", e => {
   const cmd = raw.toLowerCase();
   print(prompt() + raw);
 
-  /* LOGIN */
+  /* NAME ENTRY */
   if (waitingName) {
     if (cmd.startsWith("name ")) {
       username = raw.substring(5);
       waitingName = false;
+
+      if (username.toLowerCase() === "admin") {
+        adminMode = true;
+        header.textContent = "ADMIN Hacking Terminal";
+        document.title = "Admin Hacking Terminal";
+        print("ADMIN MODE ENABLED");
+      }
+
       print("Welcome " + username);
       print("Type unlock");
     }
     return;
   }
 
+  /* UNLOCK */
   if (cmd === "unlock") {
     waitingPass = true;
     print("Enter: password <password>");
@@ -149,116 +161,58 @@ input.addEventListener("keydown", e => {
   if (cmd === "help") {
     print("Commands:");
     print("status, clear");
-    print("network, scan, missions");
-    print("computers, connect <name>");
-    print("files, download <file>");
-    print("help computer");
     print("theme green | blue | red");
-    return;
-  }
-
-  /* STATUS */
-  if (cmd === "status") {
-    print("SYSTEM STATUS: STABLE");
-    print("TRACE LEVEL: 0%");
-    return;
-  }
-
-  /* NETWORK */
-  if (cmd === "network") {
-    print("NETWORK MAP:");
-    print("[LOCAL] ── [ROUTER] ── [TARGET]");
-    return;
-  }
-
-  if (cmd === "scan") {
-    print("Scanning network...");
-    setTimeout(() => print("Scan complete. 3 nodes found."), 1200);
-    return;
-  }
-
-  /* MISSIONS */
-  if (cmd === "missions") {
-    print("ACTIVE MISSIONS:");
-    print("- Scan network");
-    print("- Download files");
-    print("- Disable target");
-    return;
-  }
-
-  /* COMPUTERS */
-  if (cmd === "computers") {
-    Object.keys(computers).forEach(c => print("- " + c));
-    return;
-  }
-
-  if (cmd.startsWith("connect ")) {
-    const c = raw.substring(8);
-    if (!computers[c]) {
-      print("Computer not found");
-    } else {
-      connected = c;
-      print("Connected to " + c);
+    if (adminMode) {
+      print("ADMIN COMMANDS:");
+      print("hack nsc");
+      print("hack global");
+      print("hack military");
+      print("hack terminal <target>");
     }
-    return;
-  }
-
-  if (cmd === "help computer") {
-    print("COMPUTER COMMANDS:");
-    print("computer status");
-    print("computer hack");
-    print("computer shutdown");
-    return;
-  }
-
-  if (cmd === "computer status") {
-    print("Computer online. Security level: LOW");
-    return;
-  }
-
-  if (cmd === "computer hack") {
-    print("Hacking computer...");
-    setTimeout(() => print("Computer compromised."), 2000);
-    return;
-  }
-
-  if (cmd === "computer shutdown") {
-    print("Computer offline.");
-    return;
-  }
-
-  /* FILES */
-  if (cmd === "files") {
-    if (!connected) {
-      print("Not connected to a computer");
-      return;
-    }
-    computers[connected].forEach(f => print("- " + f));
-    return;
-  }
-
-  if (cmd.startsWith("download ")) {
-    print("Downloading file...");
-    setTimeout(() => print("Download complete."), 1500);
     return;
   }
 
   /* THEMES */
   if (cmd === "theme green") {
     setTheme("#001a00", "#000000", "#00ff66");
-    print("Theme set to green");
     return;
   }
 
   if (cmd === "theme blue") {
     setTheme("#00101a", "#000814", "#4cc9f0");
-    print("Theme set to blue");
     return;
   }
 
   if (cmd === "theme red") {
     setTheme("#1a0000", "#140000", "#ff4d4d");
-    print("Theme set to red");
+    return;
+  }
+
+  /* ADMIN HACKS */
+  if (adminMode && cmd === "hack nsc") {
+    runHack("National Space Company");
+    return;
+  }
+
+  if (adminMode && cmd === "hack global") {
+    runHack("Global Terminal");
+    return;
+  }
+
+  if (adminMode && cmd === "hack military") {
+    runHack("Military Terminal");
+    return;
+  }
+
+  if (adminMode && cmd.startsWith("hack terminal ")) {
+    const target = raw.substring(14);
+    runHack(target);
+    return;
+  }
+
+  /* STATUS */
+  if (cmd === "status") {
+    print("SYSTEM STATUS: STABLE");
     return;
   }
 
