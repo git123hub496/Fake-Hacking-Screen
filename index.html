@@ -18,10 +18,16 @@
     <p>MISSION COMPLETE</p>
   </div>
 </div>
+  
+:root {
+  --bg: radial-gradient(circle at top, #001a00, #000);
+  --fg: #00ff66;
+  --border: #00ff66;
+}
 
 body {
   margin: 0;
-  background: radial-gradient(circle at top, var(--bg1), var(--bg2));
+  background: var(--bg);
   color: var(--fg);
   font-family: monospace;
   overflow: hidden;
@@ -31,7 +37,7 @@ body {
   text-align: center;
   padding: 12px;
   font-size: 22px;
-  border-bottom: 1px solid var(--fg);
+  border-bottom: 1px solid var(--border);
 }
 
 #terminal {
@@ -44,7 +50,7 @@ body {
 }
 
 #inputBar {
-  border-top: 1px solid var(--fg);
+  border-top: 1px solid var(--border);
   padding: 10px;
 }
 
