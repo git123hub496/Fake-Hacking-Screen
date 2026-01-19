@@ -4,7 +4,10 @@
 <meta charset="UTF-8">
 <title>Hacking Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link rel="icon" href="favicon.ico">
 <link rel="icon" type="image/png" href="favicon.png">
+<link rel="apple-touch-icon" href="favicon.png">
 
 <style>
 :root {
@@ -70,154 +73,173 @@ let waitingName = true;
 let waitingPass = false;
 let locked = true;
 let isAdmin = false;
+let online = true;
+let trace = 0;
+let disabled = false;
 
 const PASSWORD = "access123";
 
-function print(text) {
-  terminal.textContent += text + "\n";
-  terminal.scrollTop = terminal.scrollHeight;
+const fakeFiles = ["logs.sys", "bank.dat", "access.key", "users.db"];
+
+function print(t){ terminal.textContent += t + "\n"; terminal.scrollTop = terminal.scrollHeight; }
+function prompt(){ return isAdmin ? "ADMIN@terminal# " : `${username}@terminal> `; }
+
+function setTheme(t){
+  if(t==="green"){css("#001a00","#00ff66")}
+  if(t==="red"){css("#200000","#ff3333")}
+  if(t==="blue"){css("#001020","#33aaff")}
+}
+function css(bg,fg){
+  document.documentElement.style.setProperty("--bg",`radial-gradient(circle at top, ${bg}, #000)`);
+  document.documentElement.style.setProperty("--fg",fg);
+  document.documentElement.style.setProperty("--border",fg);
 }
 
-function prompt() {
-  return isAdmin
-    ? `ADMIN@terminal# `
-    : `${username}@terminal> `;
-}
-
-/* THEMES */
-function setTheme(theme) {
-  if (theme === "green") {
-    document.documentElement.style.setProperty("--bg","radial-gradient(circle at top, #001a00, #000)");
-    document.documentElement.style.setProperty("--fg","#00ff66");
-    document.documentElement.style.setProperty("--border","#00ff66");
-  }
-  if (theme === "red") {
-    document.documentElement.style.setProperty("--bg","radial-gradient(circle at top, #200000, #000)");
-    document.documentElement.style.setProperty("--fg","#ff3333");
-    document.documentElement.style.setProperty("--border","#ff3333");
-  }
-  if (theme === "blue") {
-    document.documentElement.style.setProperty("--bg","radial-gradient(circle at top, #001020, #000)");
-    document.documentElement.style.setProperty("--fg","#33aaff");
-    document.documentElement.style.setProperty("--border","#33aaff");
-  }
-}
-
-/* START */
 print("SYSTEM ONLINE");
 print("Enter username: name <yourname>");
 
-input.addEventListener("keydown", e => {
-  if (e.key !== "Enter") return;
+input.addEventListener("keydown",e=>{
+if(e.key!=="Enter")return;
+const raw=input.value.trim(); input.value="";
+if(!raw)return;
+const cmd=raw.toLowerCase();
+print(prompt()+raw);
 
-  const raw = input.value.trim();
-  input.value = "";
-  if (!raw) return;
+if(disabled){ print("TERMINAL DISABLED"); return; }
 
-  const cmd = raw.toLowerCase();
-  print(prompt() + raw);
-
-  /* USERNAME */
-  if (waitingName) {
-    if (cmd.startsWith("name ")) {
-      username = raw.substring(5);
-      waitingName = false;
-
-      if (username.toLowerCase() === "admin") {
-        isAdmin = true;
-        header.textContent = "ADMIN Hacking Terminal";
-        document.title = "Admin Hacking Terminal";
-        print("ADMIN USER DETECTED");
-      } else {
-        print("Welcome " + username);
-      }
-
-      print("Type unlock");
+/* NAME */
+if(waitingName){
+  if(cmd.startsWith("name ")){
+    username=raw.slice(5);
+    waitingName=false;
+    if(username.toLowerCase()==="admin"){
+      isAdmin=true;
+      header.textContent="ADMIN Hacking Terminal";
+      document.title="Admin Hacking Terminal";
+      print("ADMIN MODE ENABLED");
     }
-    return;
+    print("Type unlock");
   }
+  return;
+}
 
-  /* UNLOCK */
-  if (cmd === "unlock") {
-    waitingPass = true;
-    print("Enter: password <password>");
-    return;
+/* UNLOCK */
+if(cmd==="unlock"){ waitingPass=true; print("password <password>"); return; }
+if(waitingPass){
+  if(cmd.startsWith("password ")){
+    if(raw.slice(9)===PASSWORD){
+      locked=false; waitingPass=false;
+      print("ACCESS GRANTED");
+      print("Type help");
+    } else print("ACCESS DENIED");
   }
+  return;
+}
+if(locked){ print("TERMINAL LOCKED"); return; }
 
-  if (waitingPass) {
-    if (cmd.startsWith("password ")) {
-      if (raw.substring(9) === PASSWORD) {
-        locked = false;
-        waitingPass = false;
-        print("ACCESS GRANTED");
-        print("Type help");
-      } else {
-        print("ACCESS DENIED");
-      }
-    }
-    return;
+/* HELP */
+if(cmd==="help"){
+  print("Basic:");
+  print("status clear online offline trace reboot");
+  print("scan scan files files download <file>");
+  print("missions disable terminal");
+  print("theme green | red | blue");
+  if(isAdmin){
+    print("ADMIN:");
+    print("hack nsc | global terminal | military terminal");
+    print("hack terminal <name>");
+    print("beat");
   }
+  return;
+}
 
-  if (locked) {
-    print("TERMINAL LOCKED");
-    return;
-  }
+/* STATUS */
+if(cmd==="status"){
+  print(`STATUS: ${online?"ONLINE":"OFFLINE"}`);
+  print(`TRACE: ${trace}%`);
+  return;
+}
 
-  /* HELP */
-  if (cmd === "help") {
-    print("Commands:");
-    print("status, clear");
-    print("theme green | red | blue");
-    if (isAdmin) {
-      print("ADMIN COMMANDS:");
-      print("hack nsc");
-      print("hack global terminal");
-      print("hack military terminal");
-      print("hack terminal <name>");
-      print("beat");
-    }
-    return;
-  }
+/* ONLINE/OFFLINE */
+if(cmd==="offline"){ online=false; print("Network disconnected"); return; }
+if(cmd==="online"){ online=true; print("Network connected"); return; }
 
-  /* STATUS */
-  if (cmd === "status") {
-    print("SYSTEM STATUS: STABLE");
-    print("TRACE LEVEL: 0%");
-    return;
-  }
+/* TRACE */
+if(cmd==="trace"){
+  trace+=10;
+  print("TRACE INCREASED");
+  if(trace>=100) print("!!! TRACE MAXED !!!");
+  return;
+}
 
-  /* CLEAR */
-  if (cmd === "clear") {
-    terminal.textContent = "";
-    return;
-  }
+/* SCAN */
+if(cmd==="scan"){
+  print("Scanning network...");
+  setTimeout(()=>print("Scan complete"),800);
+  return;
+}
+if(cmd==="scan files"){
+  print("Scanning files...");
+  setTimeout(()=>fakeFiles.forEach(f=>print("- "+f)),800);
+  return;
+}
 
-  /* THEMES */
-  if (cmd.startsWith("theme ")) {
-    setTheme(cmd.split(" ")[1]);
-    print("Theme applied");
-    return;
-  }
+/* FILES */
+if(cmd==="files"){ fakeFiles.forEach(f=>print(f)); return; }
 
-  /* ADMIN HACKS */
-  if (isAdmin && cmd.startsWith("hack ")) {
-    const target = raw.substring(5);
-    print("HACKING " + target.toUpperCase() + "...");
-    setTimeout(() => print("ACCESS GRANTED"), 800);
-    return;
-  }
+/* DOWNLOAD */
+if(cmd.startsWith("download ")){
+  const f=raw.slice(9);
+  if(!fakeFiles.includes(f)){ print("File not found"); return; }
+  print("Downloading "+f+"...");
+  setTimeout(()=>print("Download complete"),900);
+  return;
+}
 
-  /* END SCREEN */
-  if (isAdmin && cmd === "beat") {
-    terminal.textContent = "";
-    print("=================================");
-    print("      YOU WON!!!");
-    print("   SYSTEM DOMINATED");
-    print("=================================");
-    return;
-  }
+/* MISSIONS */
+if(cmd==="missions"){
+  print("MISSIONS:");
+  print("- Infiltrate system");
+  print("- Extract files");
+  print("- Avoid trace");
+  return;
+}
 
-  print("UNKNOWN COMMAND");
+/* DISABLE */
+if(cmd==="disable terminal"){
+  disabled=true;
+  print("TERMINAL DISABLED");
+  setTimeout(()=>{disabled=false; print("TERMINAL RE-ENABLED")},3000);
+  return;
+}
+
+/* REBOOT */
+if(cmd==="reboot"){
+  terminal.textContent="";
+  trace=0;
+  online=true;
+  print("SYSTEM REBOOTING...");
+  setTimeout(()=>print("SYSTEM ONLINE"),700);
+  return;
+}
+
+/* ADMIN HACKS */
+if(isAdmin && cmd.startsWith("hack ")){
+  const t=raw.slice(5);
+  print("HACKING "+t.toUpperCase()+"...");
+  setTimeout(()=>print("ACCESS GRANTED"),800);
+  return;
+}
+
+/* END */
+if(isAdmin && cmd==="beat"){
+  terminal.textContent="";
+  print("========== YOU WON ==========");
+  print("SYSTEM FULLY COMPROMISED");
+  return;
+}
+
+print("UNKNOWN COMMAND");
 });
 </script>
 
