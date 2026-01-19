@@ -70,9 +70,12 @@ const header=document.getElementById("header");
 
 let booting=true;
 let username="user";
+let isAdmin=false;
+
 let waitingName=true;
 let locked=true;
 let waitingPass=false;
+
 let versionMode="v5";
 
 /* v3 state */
@@ -85,33 +88,33 @@ let trace=0;
 
 const PASSWORD="access123";
 
+/* utils */
 function print(t){
   terminal.textContent+=t+"\n";
   terminal.scrollTop=terminal.scrollHeight;
 }
 function prompt(){
+  if(isAdmin) return `ADMIN@${versionMode}# `;
   return `${username}@${versionMode}> `;
 }
 
-/* =======================
+/* =====================
    BOOT SEQUENCE
-======================= */
+===================== */
 const bootLines=[
   "Booting Hacking Terminal...",
   "Loading kernel modules...",
   "Initializing secure shell...",
-  "Checking network interfaces...",
+  "Checking network...",
   "Mounting virtual drives...",
   "Starting services...",
   "System ready."
 ];
 
 let bootStep=0;
-
 function boot(){
   if(bootStep<bootLines.length){
-    print(bootLines[bootStep]);
-    bootStep++;
+    print(bootLines[bootStep++]);
     setTimeout(boot,600);
   }else{
     booting=false;
@@ -122,18 +125,19 @@ function boot(){
     print("Enter username: name <yourname>");
   }
 }
-
 boot();
 
-/* =======================
+/* =====================
    INPUT HANDLER
-======================= */
+===================== */
 input.addEventListener("keydown",e=>{
-if(e.key!=="Enter" || booting)return;
+if(e.key!=="Enter"||booting)return;
+
 const raw=input.value.trim();
 input.value="";
 if(!raw)return;
 const cmd=raw.toLowerCase();
+
 print(prompt()+raw);
 
 /* NAME */
@@ -141,6 +145,14 @@ if(waitingName){
   if(cmd.startsWith("name ")){
     username=raw.slice(5);
     waitingName=false;
+
+    if(username.toLowerCase()==="admin"){
+      isAdmin=true;
+      header.textContent="ADMIN Hacking Terminal";
+      document.title="Admin Hacking Terminal";
+      print("ADMIN MODE ENABLED");
+    }
+
     print("Welcome "+username);
     print("Type unlock");
   }
@@ -175,7 +187,7 @@ if(locked){
 if(cmd==="version"){
   print("Available versions:");
   print("- v3 (classic)");
-  print("- v5 (current)");
+  print("- v5 (modern)");
   print("Use: use v3 | use v5");
   return;
 }
@@ -198,9 +210,9 @@ if(cmd==="use v5"){
   return;
 }
 
-/* =======================
-   CLASSIC v3 MODE
-======================= */
+/* =====================
+   CLASSIC v3
+===================== */
 if(versionMode==="v3"){
 
   if(v3Locked){
@@ -209,7 +221,6 @@ if(versionMode==="v3"){
   }
 
   if(cmd==="help"){
-    print("Commands:");
     print("scan, hack, progress");
     print("online, offline, status");
     print("whoami, lock, clear, complete");
@@ -217,18 +228,8 @@ if(versionMode==="v3"){
   }
 
   if(cmd==="whoami"){ print(username); return; }
-
-  if(cmd==="scan"){
-    print("Scanning...");
-    setTimeout(()=>print("Scan complete"),600);
-    return;
-  }
-
-  if(cmd==="hack"){
-    v3Progress=0;
-    print("Hacking started...");
-    return;
-  }
+  if(cmd==="scan"){ print("Scanning..."); setTimeout(()=>print("Scan complete"),600); return; }
+  if(cmd==="hack"){ v3Progress=0; print("Hacking started..."); return; }
 
   if(cmd==="progress"){
     v3Progress+=25;
@@ -237,12 +238,11 @@ if(versionMode==="v3"){
     return;
   }
 
-  if(cmd==="online"){ print("Connection ONLINE"); return; }
-  if(cmd==="offline"){ print("Connection OFFLINE"); return; }
-  if(cmd==="status"){ print("SYSTEM STATUS: STABLE"); return; }
+  if(cmd==="online"){ print("ONLINE"); return; }
+  if(cmd==="offline"){ print("OFFLINE"); return; }
+  if(cmd==="status"){ print("STATUS: STABLE"); return; }
 
   if(cmd==="lock"){ v3Locked=true; print("TERMINAL LOCKED"); return; }
-
   if(cmd==="clear"){ terminal.textContent=""; return; }
 
   if(cmd==="complete"){
@@ -256,13 +256,15 @@ if(versionMode==="v3"){
   return;
 }
 
-/* =======================
-   MODERN v5 MODE
-======================= */
+/* =====================
+   MODERN v5
+===================== */
 if(cmd==="help"){
-  print("Commands:");
   print("status online offline trace");
   print("version use v3 use v5");
+  if(isAdmin){
+    print("ADMIN: hack <target>, beat");
+  }
   print("clear");
   return;
 }
@@ -272,18 +274,23 @@ if(cmd==="status"){
   print("TRACE: "+trace+"%");
   return;
 }
-
 if(cmd==="online"){ online=true; print("Network ONLINE"); return; }
 if(cmd==="offline"){ online=false; print("Network OFFLINE"); return; }
+if(cmd==="trace"){ trace+=10; print("TRACE LEVEL: "+trace+"%"); return; }
+if(cmd==="clear"){ terminal.textContent=""; return; }
 
-if(cmd==="trace"){
-  trace+=10;
-  print("TRACE LEVEL: "+trace+"%");
+/* ADMIN COMMANDS */
+if(isAdmin && cmd.startsWith("hack ")){
+  const target=raw.slice(5);
+  print("HACKING "+target.toUpperCase()+"...");
+  setTimeout(()=>print("ACCESS GRANTED"),800);
   return;
 }
 
-if(cmd==="clear"){
+if(isAdmin && cmd==="beat"){
   terminal.textContent="";
+  print("=========== YOU WON ===========");
+  print("SYSTEM FULLY COMPROMISED");
   return;
 }
 
