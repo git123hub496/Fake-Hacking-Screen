@@ -60,7 +60,7 @@ body{
 <div id="header">Hacking Terminal</div>
 <div id="terminal"></div>
 <div id="inputBar">
-  <input id="cmd" placeholder="type command..." autofocus>
+  <input id="cmd" placeholder="booting..." disabled>
 </div>
 
 <script>
@@ -68,6 +68,7 @@ const terminal=document.getElementById("terminal");
 const input=document.getElementById("cmd");
 const header=document.getElementById("header");
 
+let booting=true;
 let username="user";
 let waitingName=true;
 let locked=true;
@@ -92,12 +93,43 @@ function prompt(){
   return `${username}@${versionMode}> `;
 }
 
-/* BOOT */
-print("SYSTEM ONLINE");
-print("Enter username: name <yourname>");
+/* =======================
+   BOOT SEQUENCE
+======================= */
+const bootLines=[
+  "Booting Hacking Terminal...",
+  "Loading kernel modules...",
+  "Initializing secure shell...",
+  "Checking network interfaces...",
+  "Mounting virtual drives...",
+  "Starting services...",
+  "System ready."
+];
 
+let bootStep=0;
+
+function boot(){
+  if(bootStep<bootLines.length){
+    print(bootLines[bootStep]);
+    bootStep++;
+    setTimeout(boot,600);
+  }else{
+    booting=false;
+    input.disabled=false;
+    input.placeholder="type command...";
+    print("");
+    print("SYSTEM ONLINE");
+    print("Enter username: name <yourname>");
+  }
+}
+
+boot();
+
+/* =======================
+   INPUT HANDLER
+======================= */
 input.addEventListener("keydown",e=>{
-if(e.key!=="Enter")return;
+if(e.key!=="Enter" || booting)return;
 const raw=input.value.trim();
 input.value="";
 if(!raw)return;
@@ -139,7 +171,7 @@ if(locked){
   return;
 }
 
-/* VERSION COMMANDS */
+/* VERSION */
 if(cmd==="version"){
   print("Available versions:");
   print("- v3 (classic)");
@@ -184,10 +216,7 @@ if(versionMode==="v3"){
     return;
   }
 
-  if(cmd==="whoami"){
-    print(username);
-    return;
-  }
+  if(cmd==="whoami"){ print(username); return; }
 
   if(cmd==="scan"){
     print("Scanning...");
@@ -204,37 +233,17 @@ if(versionMode==="v3"){
   if(cmd==="progress"){
     v3Progress+=25;
     print("Progress: "+v3Progress+"%");
-    if(v3Progress>=100){
-      print("Hack complete");
-    }
+    if(v3Progress>=100) print("Hack complete");
     return;
   }
 
-  if(cmd==="online"){
-    print("Connection ONLINE");
-    return;
-  }
+  if(cmd==="online"){ print("Connection ONLINE"); return; }
+  if(cmd==="offline"){ print("Connection OFFLINE"); return; }
+  if(cmd==="status"){ print("SYSTEM STATUS: STABLE"); return; }
 
-  if(cmd==="offline"){
-    print("Connection OFFLINE");
-    return;
-  }
+  if(cmd==="lock"){ v3Locked=true; print("TERMINAL LOCKED"); return; }
 
-  if(cmd==="status"){
-    print("SYSTEM STATUS: STABLE");
-    return;
-  }
-
-  if(cmd==="lock"){
-    v3Locked=true;
-    print("TERMINAL LOCKED");
-    return;
-  }
-
-  if(cmd==="clear"){
-    terminal.textContent="";
-    return;
-  }
+  if(cmd==="clear"){ terminal.textContent=""; return; }
 
   if(cmd==="complete"){
     terminal.textContent="";
@@ -264,17 +273,8 @@ if(cmd==="status"){
   return;
 }
 
-if(cmd==="online"){
-  online=true;
-  print("Network ONLINE");
-  return;
-}
-
-if(cmd==="offline"){
-  online=false;
-  print("Network OFFLINE");
-  return;
-}
+if(cmd==="online"){ online=true; print("Network ONLINE"); return; }
+if(cmd==="offline"){ online=false; print("Network OFFLINE"); return; }
 
 if(cmd==="trace"){
   trace+=10;
