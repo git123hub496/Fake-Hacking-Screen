@@ -5,136 +5,50 @@
 <title>Hacking Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link id="favicon" rel="icon" href="favicon.png">
-
 <style>
 :root{
-  --bg:#000;
-  --panel:#001a00;
-  --fg:#00ff66;
-  --border:#00ff66;
+  --bg:#000; --panel:#001a00; --fg:#00ff66; --border:#00ff66;
 }
 .theme-green{--bg:#000;--panel:#001a00;--fg:#00ff66;--border:#00ff66;}
 .theme-red{--bg:#140000;--panel:#260000;--fg:#ff4444;--border:#ff4444;}
 .theme-blue{--bg:#000814;--panel:#001a33;--fg:#33aaff;--border:#33aaff;}
 
-body{
-  margin:0;
-  background:var(--bg);
-  color:var(--fg);
-  font-family:monospace;
-  height:100vh;
-  display:flex;
-  flex-direction:column;
-  overflow:hidden;
-}
+body{margin:0;background:var(--bg);color:var(--fg);font-family:monospace;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 #header{text-align:center;padding:10px;border-bottom:2px solid var(--border);font-size:22px;}
-#main{flex:1;display:flex;flex-direction:column;}
 #terminalWrap{flex:1;display:flex;flex-direction:column;padding:10px;overflow:hidden;}
 #terminal{flex:1;overflow-y:auto;white-space:pre-wrap;}
 #inputBar{border-top:2px solid var(--border);padding:8px;}
 #cmd{width:100%;background:black;color:var(--fg);border:none;outline:none;font-size:16px;}
 
-#taskbar{
-  height:50px;
-  background:var(--panel);
-  border-top:2px solid var(--border);
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  padding:0 10px;
-}
-
-#launcher{
-  width:36px;
-  height:36px;
-  border:none;
-  background:url('favicon.png') no-repeat center center;
-  background-size:contain;
-  cursor:pointer;
-  border-radius:6px;
-}
+#taskbar{height:50px;background:var(--panel);border-top:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 10px;}
+#launcher{width:36px;height:36px;border:none;background:url('favicon.png') no-repeat center/contain;cursor:pointer;border-radius:6px;}
 #launcher:hover{filter:brightness(1.2);}
-
 #appbar{display:flex;align-items:center;gap:12px;}
-#appbar button{
-  background:transparent;
-  border:none;
-  color:var(--fg);
-  font-size:22px;
-  cursor:pointer;
-  padding:4px 6px;
-  border-radius:6px;
-}
-#appbar button:hover{
-  background:var(--fg);
-  color:var(--panel);
-  transform:scale(1.2);
-  transition:0.2s;
-}
-
+#appbar button{background:transparent;border:none;color:var(--fg);font-size:22px;cursor:pointer;padding:4px 6px;border-radius:6px;}
+#appbar button:hover{background:var(--fg);color:var(--panel);transform:scale(1.2);transition:0.2s;}
 #status{display:flex;align-items:center;gap:12px;}
 #battery{display:flex;align-items:center;gap:4px;}
 #batteryBox{width:22px;height:12px;border:2px solid var(--fg);}
 #batteryFill{height:100%;width:60%;background:var(--fg);}
 #batteryTip{width:3px;height:6px;background:var(--fg);}
 
-.window{
-  position:absolute;
-  top:90px;
-  left:90px;
-  width:280px;
-  background:var(--panel);
-  border:2px solid var(--border);
-  padding:8px;
-  z-index:10;
-  cursor:move;
-}
+.window{position:absolute;top:90px;left:90px;width:280px;background:var(--panel);border:2px solid var(--border);padding:8px;z-index:10;cursor:move;}
 .close{float:right;cursor:pointer;}
 .hidden{display:none;}
 
 /* Launcher Menu */
-#launcherMenu{
-  position:absolute;
-  bottom:50px;
-  left:10px;
-  width:220px;
-  background:var(--panel);
-  border:2px solid var(--border);
-  padding:6px;
-  display:none;
-  flex-direction:column;
-  gap:6px;
-  z-index:1000;
-  border-radius:6px;
-}
-#launcherMenu button{
-  background:transparent;
-  border:none;
-  color:var(--fg);
-  text-align:left;
-  padding:4px 6px;
-  cursor:pointer;
-  border-radius:4px;
-}
-#launcherMenu button:hover{
-  background:var(--fg);
-  color:var(--panel);
-}
-input[type="range"]{
-  width:100%;
-}
+#launcherMenu{position:absolute;bottom:50px;left:10px;width:220px;background:var(--panel);border:2px solid var(--border);padding:6px;display:none;flex-direction:column;gap:6px;z-index:1000;border-radius:6px;}
+#launcherMenu button{background:transparent;border:none;color:var(--fg);text-align:left;padding:4px 6px;cursor:pointer;border-radius:4px;}
+#launcherMenu button:hover{background:var(--fg);color:var(--panel);}
+input[type="range"]{width:100%;}
 </style>
 </head>
-
 <body class="theme-green">
 
 <div id="header">Hacking Terminal</div>
-
-<div id="main">
-  <div id="terminalWrap">
-    <div id="terminal"></div>
-    <div id="inputBar"><input id="cmd" placeholder="booting..." disabled></div>
-  </div>
+<div id="terminalWrap">
+  <div id="terminal"></div>
+  <div id="inputBar"><input id="cmd" placeholder="booting..." disabled></div>
 </div>
 
 <div id="taskbar">
@@ -155,7 +69,7 @@ input[type="range"]{
   </div>
 </div>
 
-<!-- LAUNCHER MENU -->
+<!-- Launcher Menu -->
 <div id="launcherMenu">
   <button onclick="openApp('files')">📁 Files</button>
   <button onclick="openApp('calc')">🧮 Calculator</button>
@@ -168,46 +82,30 @@ input[type="range"]{
 </div>
 
 <!-- APP WINDOWS -->
-<div id="files" class="window hidden">
-  <span class="close" onclick="closeApp('files')">✖</span>
-  <b>File Explorer</b><br><br>
-  system.log<br>users.db<br>keys.key
+<div id="files" class="window hidden"><span class="close" onclick="closeApp('files')">✖</span>
+<b>File Explorer</b><br><br><div id="fileList"></div>
 </div>
-
-<div id="calc" class="window hidden">
-  <span class="close" onclick="closeApp('calc')">✖</span>
-  <b>Calculator</b><br><br>
-  <input id="calcIn" style="width:100%">
-  <button onclick="doCalc()">=</button>
-  <div id="calcOut"></div>
+<div id="calc" class="window hidden"><span class="close" onclick="closeApp('calc')">✖</span>
+<b>Calculator</b><br><br><input id="calcIn" style="width:100%"><button onclick="doCalc()">=</button><div id="calcOut"></div>
 </div>
-
-<div id="about" class="window hidden">
-  <span class="close" onclick="closeApp('about')">✖</span>
-  <b>System Info</b><br><br>
-  FakeOS v5<br>Status: Stable
+<div id="about" class="window hidden"><span class="close" onclick="closeApp('about')">✖</span>
+<b>System Info</b><br><br>FakeOS v5<br>Status: Stable
 </div>
-
-<!-- SETTINGS APP -->
-<div id="settings" class="window hidden">
-  <span class="close" onclick="closeApp('settings')">✖</span>
-  <b>Settings & Cheats</b><br><br>
-
-  <label>Brightness: <span id="brightnessVal">100</span>%</label>
-  <input type="range" id="brightness" min="10" max="200" value="100" oninput="updateBrightness(this.value)"><br><br>
-
-  <label>Contrast: <span id="contrastVal">100</span>%</label>
-  <input type="range" id="contrast" min="50" max="200" value="100" oninput="updateContrast(this.value)"><br><br>
-
-  <label>Terminal Font Size: <span id="fontVal">16</span>px</label>
-  <input type="range" id="fontsize" min="10" max="30" value="16" oninput="updateFontSize(this.value)"><br><br>
-
-  <b>Cheats:</b><br>
-  <input type="checkbox" id="cheatTrace" onchange="toggleCheat('trace')"> Unlimited Trace<br>
-  <input type="checkbox" id="cheatHack" onchange="toggleCheat('hack')"> Instant Hack<br>
+<div id="settings" class="window hidden"><span class="close" onclick="closeApp('settings')">✖</span>
+<b>Settings & Cheats</b><br><br>
+<label>Brightness: <span id="brightnessVal">100</span>%</label>
+<input type="range" id="brightness" min="10" max="200" value="100" oninput="updateBrightness(this.value)"><br><br>
+<label>Contrast: <span id="contrastVal">100</span>%</label>
+<input type="range" id="contrast" min="50" max="200" value="100" oninput="updateContrast(this.value)"><br><br>
+<label>Terminal Font Size: <span id="fontVal">16</span>px</label>
+<input type="range" id="fontsize" min="10" max="30" value="16" oninput="updateFontSize(this.value)"><br><br>
+<b>Cheats:</b><br>
+<input type="checkbox" id="cheatTrace" onchange="toggleCheat('trace')"> Unlimited Trace<br>
+<input type="checkbox" id="cheatHack" onchange="toggleCheat('hack')"> Instant Hack
 </div>
 
 <script>
+// Core variables
 const terminal=document.getElementById("terminal");
 const input=document.getElementById("cmd");
 const header=document.getElementById("header");
@@ -215,84 +113,69 @@ const launcher=document.getElementById("launcher");
 const launcherMenu=document.getElementById("launcherMenu");
 const favicon=document.getElementById("favicon");
 
-let waitingName=true, isAdmin=false;
-let username="user";
-let connected=null;
-let trace=0;
-let startTime=Date.now();
+let waitingName=true,isAdmin=false,username="user",connected=null,trace=0,startTime=Date.now();
 let cheats={trace:false,hack:false};
+const downloads={};
+const computers={"office-pc":["mail.txt","finance.xls"],"server-node":["users.db","keys.key"]};
 
-const computers={
-  "office-pc":["mail.txt","finance.xls"],
-  "server-node":["users.db","keys.key"]
-};
+// BOOT SEQUENCE
+const boot=["Booting Hacking Terminal...","Loading modules...","Initializing UI...","System ready.","","Enter username: name <yourname>"];
+let bi=0;
+const bootInt=setInterval(()=>{print(boot[bi++]);if(bi>=boot.length){clearInterval(bootInt);input.disabled=false;input.placeholder="type command...";}},500);
 
+// TERMINAL FUNCTIONS
 function print(t){terminal.textContent+=t+"\n";terminal.scrollTop=terminal.scrollHeight}
 function prompt(){return (isAdmin?"ADMIN":"user")+"@terminal> "}
 
-/* BOOT */
-const boot=[
-  "Booting Hacking Terminal...",
-  "Loading modules...",
-  "Initializing UI...",
-  "System ready.",
-  "",
-  "Enter username: name <yourname>"
-];
-let bi=0;
-const bootInt=setInterval(()=>{
-  print(boot[bi++]);
-  if(bi>=boot.length){
-    clearInterval(bootInt);
-    input.disabled=false;
-    input.placeholder="type command...";
-  }
-},500);
-
-/* TERMINAL INPUT */
+// COMMAND HANDLER
 input.addEventListener("keydown",e=>{
-  if(e.key!=="Enter")return;
-  const raw=input.value.trim();
-  input.value="";
-  if(!raw)return;
+  if(e.key!=="Enter") return;
+  const raw=input.value.trim(); input.value="";
+  if(!raw) return;
   const cmd=raw.toLowerCase();
   print(prompt()+raw);
 
   if(waitingName){
-    if(cmd.startsWith("name ")){
-      username=raw.slice(5);
-      waitingName=false;
-      if(username==="admin"){
-        isAdmin=true;
-        header.textContent="ADMIN Hacking Terminal";
-        document.title="Admin Hacking Terminal";
-      }
-      print("ACCESS GRANTED");
-      print("Type help");
+    if(cmd.startsWith("name ")){username=raw.slice(5);waitingName=false;
+      if(username==="admin"){isAdmin=true;header.textContent="ADMIN Hacking Terminal";document.title="Admin Hacking Terminal";}
+      print("ACCESS GRANTED"); print("Type help");
     }
     return;
   }
 
-  /* COMMANDS */
-  if(cmd==="help"){print("whoami, date, time, uptime\nscan, hack, progress\ncomputers, connect <name>, disconnect\nls, cat <file>\nping <target>, trace, trace reset\ndownload <file>, upload <file>\nencrypt <file>, decrypt <file>\nnetworkmap, mission, credits\nclear");if(isAdmin) print("ADMIN: shutdown, override, nuke, beat"); return;}
-  if(cmd==="whoami"){print(username);return}
-  if(cmd==="date"){print(new Date().toDateString());return}
-  if(cmd==="time"){print(new Date().toLocaleTimeString());return}
-  if(cmd==="uptime"){print(Math.floor((Date.now()-startTime)/1000)+"s");return}
-  if(cmd.startsWith("echo ")){print(raw.slice(5));return}
-  if(cmd.startsWith("ping ")){print("Pinging "+raw.slice(5)+"... OK");return}
-  if(cmd==="trace"){trace+=cheats.trace?100:10;print("TRACE LEVEL: "+trace+"%");return}
-  if(cmd==="trace reset"){trace=0;print("TRACE RESET");return}
-  if(cmd==="computers"){Object.keys(computers).forEach(c=>print("- "+c));return}
+  // HELP
+  if(cmd==="help"){print("whoami, date, time, uptime\nscan, hack, progress\ncomputers, connect <name>, disconnect\nls, cat <file>\ndownload <file>, upload <file>\nnetworkmap, mission, credits\nclear"); if(isAdmin) print("ADMIN: shutdown, override, nuke, beat"); return;}
+  if(cmd==="whoami"){print(username);return;}
+  if(cmd==="date"){print(new Date().toDateString());return;}
+  if(cmd==="time"){print(new Date().toLocaleTimeString());return;}
+  if(cmd==="uptime"){print(Math.floor((Date.now()-startTime)/1000)+"s");return;}
+  if(cmd.startsWith("echo ")){print(raw.slice(5));return;}
+  if(cmd.startsWith("ping ")){print("Pinging "+raw.slice(5)+"... OK");return;}
+  if(cmd==="trace"){trace+=cheats.trace?100:10;print("TRACE LEVEL: "+trace+"%");return;}
+  if(cmd==="trace reset"){trace=0;print("TRACE RESET");return;}
+  if(cmd==="computers"){Object.keys(computers).forEach(c=>print("- "+c));return;}
   if(cmd.startsWith("connect ")){const c=raw.slice(8); if(computers[c]){connected=c;print("Connected to "+c)} else print("NOT FOUND"); return;}
-  if(cmd==="disconnect"){connected=null;print("Disconnected");return}
-  if(cmd==="ls"){if(!connected){print("Not connected");return} computers[connected].forEach(f=>print(f));return}
-  if(cmd.startsWith("cat ")){if(!connected){print("Not connected");return} print("Reading "+raw.slice(4)+"...");return}
-  if(cmd.startsWith("download ")){print("Downloading "+raw.slice(9)+"... DONE");return}
-  if(cmd.startsWith("upload ")){print("Uploading "+raw.slice(7)+"... DONE");return}
-  if(cmd.startsWith("encrypt ")){print("Encrypted "+raw.slice(8));return}
-  if(cmd.startsWith("decrypt ")){print("Decrypted "+raw.slice(8));return}
-  if(cmd==="networkmap"){print("[terminal]--[office-pc]\n        \\--[server-node]"); return;}
+  if(cmd==="disconnect"){connected=null;print("Disconnected");return;}
+  
+  // LS shows downloaded files
+  if(cmd==="ls"){let files=Object.keys(downloads); if(files.length===0){print("No files downloaded yet."); return;} files.forEach(f=>print(f));updateFileExplorer(); return;}
+  
+  // CAT reads downloaded files
+  if(cmd.startsWith("cat ")){let f=raw.slice(4).trim(); if(downloads[f]){print(`Reading ${f}...`);print(downloads[f]);} else {print("File not found.");} return;}
+  
+  // DOWNLOAD adds fun file
+  if(cmd.startsWith("download ")){
+    let f=raw.slice(9).trim();
+    if(!f){print("Specify a file to download!"); return;}
+    const funContents=["TOP SECRET DATA: 🕵️‍♂️","Access codes: 42 17 99","Mission log: infiltrated successfully","Random text: qwertyuiopasdfghjkl","Encrypted nonsense: %$#@!*&^"];
+    downloads[f]=funContents[Math.floor(Math.random()*funContents.length)];
+    print(`Downloading ${f}... DONE`); updateFileExplorer(); return;
+  }
+
+  if(cmd.startsWith("upload ")){print("Uploading "+raw.slice(7)+"... DONE");return;}
+  if(cmd.startsWith("encrypt ")){print("Encrypted "+raw.slice(8));return;}
+  if(cmd.startsWith("decrypt ")){print("Decrypted "+raw.slice(8));return;}
+  if(cmd==="networkmap"){print("[terminal]--[office-pc]\n        \\--[server-node]");return;}
   if(cmd==="mission"){print("MISSION: Infiltrate the system");return;}
   if(cmd==="credits"){print("Created by Git123Hub496");return;}
   if(cmd==="hack the planet"){print("ACCESS GRANTED");print("YOU WON");return;}
@@ -304,76 +187,49 @@ input.addEventListener("keydown",e=>{
   print("Unknown command");
 });
 
-/* UI HELPERS */
+// UI FUNCTIONS
 function openApp(id){document.getElementById(id).classList.remove("hidden")}
 function closeApp(id){document.getElementById(id).classList.add("hidden")}
 function doCalc(){document.getElementById("calcOut").textContent=eval(document.getElementById("calcIn").value)}
 function toggleLauncher(){launcherMenu.style.display = launcherMenu.style.display==="flex" ? "none" : "flex";}
-
-/* THEMES + LAUNCHER COLOR */
-function setTheme(t){
-  document.body.className=t;
-  if(t==="theme-green") launcher.style.filter="hue-rotate(0deg)";
-  if(t==="theme-red") launcher.style.filter="hue-rotate(210deg)";
-  if(t==="theme-blue") launcher.style.filter="hue-rotate(90deg)";
+function setTheme(t){document.body.className=t;
+  if(t==="theme-green") launcher.style.filter="hue-rotate(90deg)";
+  if(t==="theme-red") launcher.style.filter="hue-rotate(0deg)";
+  if(t==="theme-blue") launcher.style.filter="hue-rotate(210deg)";
 }
 
-/* SETTINGS APP FUNCTIONS */
-function updateBrightness(v){
-  document.getElementById('brightnessVal').textContent=v;
-  document.body.style.filter = `brightness(${v}%) contrast(${document.getElementById('contrast').value}%)`;
-}
-function updateContrast(v){
-  document.getElementById('contrastVal').textContent=v;
-  document.body.style.filter = `brightness(${document.getElementById('brightness').value}%) contrast(${v}%)`;
-}
-function updateFontSize(v){
-  document.getElementById('fontVal').textContent=v;
-  document.getElementById('terminal').style.fontSize=v+"px";
-}
-function toggleCheat(type){
-  cheats[type] = !cheats[type];
-}
+// SETTINGS APP FUNCTIONS
+function updateBrightness(v){document.getElementById('brightnessVal').textContent=v; document.body.style.filter=`brightness(${v}%) contrast(${document.getElementById('contrast').value}%)`;}
+function updateContrast(v){document.getElementById('contrastVal').textContent=v; document.body.style.filter=`brightness(${document.getElementById('brightness').value}%) contrast(${v}%)`;}
+function updateFontSize(v){document.getElementById('fontVal').textContent=v; document.getElementById('terminal').style.fontSize=v+"px";}
+function toggleCheat(type){cheats[type] = !cheats[type];}
 
-/* CLOCK & BATTERY */
-setInterval(()=>{
-  document.getElementById("clock").textContent=
-    new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-},1000);
+// CLOCK & BATTERY
+setInterval(()=>{document.getElementById("clock").textContent=new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});},1000);
+let pct=60,charging=false;
+setInterval(()=>{pct+=charging?1:-1;if(pct<=20) charging=true;if(pct>=100) charging=false;document.getElementById("batteryFill").style.width=pct+"%";document.getElementById("batteryPct").textContent=pct+"%"+(charging?" ⚡":"");},1500);
 
-let pct=60, charging=false;
-setInterval(()=>{
-  pct+=charging?1:-1;
-  if(pct<=20) charging=true;
-  if(pct>=100) charging=false;
-  document.getElementById("batteryFill").style.width=pct+"%";
-  document.getElementById("batteryPct").textContent=pct+"%"+(charging?" ⚡":"");
-},1500);
-
-/* DRAGGABLE WINDOWS */
+// DRAGGABLE WINDOWS
 const windows=document.querySelectorAll(".window");
 windows.forEach(win=>{
-  let offsetX=0, offsetY=0, isDragging=false;
-
-  win.addEventListener("mousedown", e=>{
-    if(e.target.classList.contains("close")) return;
-    isDragging=true;
-    offsetX=e.clientX - win.offsetLeft;
-    offsetY=e.clientY - win.offsetTop;
-    win.style.zIndex=1000;
-  });
-
-  document.addEventListener("mousemove", e=>{
-    if(!isDragging) return;
-    win.style.left=(e.clientX - offsetX)+"px";
-    win.style.top=(e.clientY - offsetY)+"px";
-  });
-
-  document.addEventListener("mouseup", e=>{
-    isDragging=false;
-  });
+  let offsetX=0,offsetY=0,isDragging=false;
+  win.addEventListener("mousedown",e=>{if(e.target.classList.contains("close")) return;isDragging=true;offsetX=e.clientX-win.offsetLeft;offsetY=e.clientY-win.offsetTop;win.style.zIndex=1000;});
+  document.addEventListener("mousemove",e=>{if(!isDragging) return; win.style.left=(e.clientX-offsetX)+"px"; win.style.top=(e.clientY-offsetY)+"px";});
+  document.addEventListener("mouseup",e=>{isDragging=false;});
 });
-</script>
 
+// UPDATE FILE EXPLORER
+function updateFileExplorer(){
+  const fileList=document.getElementById("fileList");
+  fileList.innerHTML="";
+  Object.keys(downloads).forEach(f=>{
+    const div=document.createElement("div");
+    div.textContent=f;
+    div.style.cursor="pointer";
+    div.onclick=()=>print(`Reading ${f}...\n${downloads[f]}`);
+    fileList.appendChild(div);
+  });
+}
+</script>
 </body>
 </html>
