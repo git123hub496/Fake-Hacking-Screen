@@ -55,6 +55,46 @@ body{
   font-size:18px;
   font-family:monospace;
 }
+  #sideUI{
+  position:fixed;
+  right:0;
+  top:0;
+  width:180px;
+  height:100%;
+  border-left:2px solid var(--border);
+  background:rgba(0,0,0,0.85);
+  color:var(--fg);
+  font-size:14px;
+  padding:10px;
+  box-sizing:border-box;
+}
+
+#sideUI h3{
+  margin:0 0 10px 0;
+  font-size:16px;
+  text-align:center;
+  border-bottom:1px solid var(--border);
+  padding-bottom:6px;
+}
+
+/* make room for sidebar */
+body{
+  padding-right:180px;
+}
+
+/* mobile adjustment */
+@media (max-width: 700px){
+  #sideUI{
+    position:relative;
+    width:100%;
+    height:auto;
+    border-left:none;
+    border-top:2px solid var(--border);
+  }
+  body{
+    padding-right:0;
+  }
+}
 </style>
 </head>
 
@@ -174,7 +214,16 @@ if(waitingName){
   }
   return;
 }
-
+  
+<div id="sideUI">
+  <h3>CREDITS</h3>
+  <div>Creator:</div>
+  <a href="https://github.com/git123hub496" target="_blank" id="creditLink">
+    Git123Hub496
+  </a>
+</div>
+}
+  
 /* UNLOCK */
 if(cmd==="unlock"){
   waitingPass=true;
