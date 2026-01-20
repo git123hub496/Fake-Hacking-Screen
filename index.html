@@ -13,14 +13,15 @@
 
 <style>
 :root{
-  --bg: radial-gradient(circle at top,#001a00,#000);
+  --bg1:#001a00;
+  --bg2:#000;
   --fg:#00ff66;
   --border:#00ff66;
 }
 
 body{
   margin:0;
-  background:var(--bg);
+  background:radial-gradient(circle at top,var(--bg1),var(--bg2));
   color:var(--fg);
   font-family:monospace;
 }
@@ -37,7 +38,7 @@ body{
   padding:10px;
   overflow-y:auto;
   white-space:pre-wrap;
-  font-size:18px; /* mobile readable */
+  font-size:18px;
 }
 
 #inputBar{
@@ -66,57 +67,77 @@ body{
 </div>
 
 <script>
-const terminal = document.getElementById("terminal");
-const input = document.getElementById("cmd");
-const header = document.getElementById("header");
+const terminal=document.getElementById("terminal");
+const input=document.getElementById("cmd");
+const header=document.getElementById("header");
+const root=document.documentElement;
 
 /* ================= STATE ================= */
-let booting = true;
-let username = "user";
-let isAdmin = false;
-let waitingName = true;
-let locked = true;
-let waitingPass = false;
+let booting=true;
+let username="user";
+let isAdmin=false;
+let waitingName=true;
+let locked=true;
+let waitingPass=false;
 
-let connected = null;
-let hacking = false;
-let hackProgress = 0;
+let connected=null;
+let hacking=false;
+let hackProgress=0;
 
-const PASSWORD = "access123";
+const PASSWORD="access123";
 
 /* NETWORK */
-const computers = {
-  "office-pc": ["emails.txt","budget.xls"],
-  "security-node": ["cams.log","doors.cfg"],
-  "space-link": ["telemetry.bin","coords.dat"]
+const computers={
+  "office-pc":["emails.txt","budget.xls"],
+  "security-node":["cams.log","doors.cfg"],
+  "space-link":["telemetry.bin","coords.dat"]
 };
 
 /* ================= UTILS ================= */
 function print(t){
-  terminal.textContent += t + "\n";
-  terminal.scrollTop = terminal.scrollHeight;
+  terminal.textContent+=t+"\n";
+  terminal.scrollTop=terminal.scrollHeight;
 }
 function prompt(){
-  return (isAdmin ? "ADMIN" : username) + (connected ? "@"+connected : "@terminal") + "> ";
+  return (isAdmin?"ADMIN":username)+(connected?"@"+connected:"@terminal")+"> ";
+}
+
+/* ================= THEMES ================= */
+function setTheme(name){
+  if(name==="green"){
+    root.style.setProperty("--bg1","#001a00");
+    root.style.setProperty("--fg","#00ff66");
+    root.style.setProperty("--border","#00ff66");
+  }
+  if(name==="red"){
+    root.style.setProperty("--bg1","#1a0000");
+    root.style.setProperty("--fg","#ff3333");
+    root.style.setProperty("--border","#ff3333");
+  }
+  if(name==="blue"){
+    root.style.setProperty("--bg1","#00101a");
+    root.style.setProperty("--fg","#33ccff");
+    root.style.setProperty("--border","#33ccff");
+  }
 }
 
 /* ================= BOOT ================= */
-const bootLines = [
+const bootLines=[
   "Booting Hacking Terminal...",
   "Loading kernel...",
   "Initializing network...",
   "System ready."
 ];
-let bootStep = 0;
+let bootStep=0;
 
 function boot(){
-  if(bootStep < bootLines.length){
+  if(bootStep<bootLines.length){
     print(bootLines[bootStep++]);
-    setTimeout(boot, 500);
-  } else {
-    booting = false;
-    input.disabled = false;
-    input.placeholder = "type command...";
+    setTimeout(boot,500);
+  }else{
+    booting=false;
+    input.disabled=false;
+    input.placeholder="type command...";
     print("");
     print("SYSTEM ONLINE");
     print("Enter username: name <yourname>");
@@ -125,49 +146,49 @@ function boot(){
 boot();
 
 /* ================= INPUT ================= */
-input.addEventListener("keydown", e=>{
-if(e.key !== "Enter" || booting) return;
+input.addEventListener("keydown",e=>{
+if(e.key!=="Enter"||booting)return;
 
-const raw = input.value.trim();
-input.value = "";
-if(!raw) return;
+const raw=input.value.trim();
+input.value="";
+if(!raw)return;
 
-const cmd = raw.toLowerCase();
-print(prompt() + raw);
+const cmd=raw.toLowerCase();
+print(prompt()+raw);
 
 /* NAME */
 if(waitingName){
   if(cmd.startsWith("name ")){
-    username = raw.slice(5);
-    waitingName = false;
+    username=raw.slice(5);
+    waitingName=false;
 
-    if(username.toLowerCase() === "admin"){
-      isAdmin = true;
-      header.textContent = "ADMIN Hacking Terminal";
-      document.title = "Admin Hacking Terminal";
+    if(username.toLowerCase()==="admin"){
+      isAdmin=true;
+      header.textContent="ADMIN Hacking Terminal";
+      document.title="Admin Hacking Terminal";
       print("ADMIN MODE ENABLED");
     }
 
-    print("Welcome " + username);
+    print("Welcome "+username);
     print("Type unlock");
   }
   return;
 }
 
 /* UNLOCK */
-if(cmd === "unlock"){
-  waitingPass = true;
+if(cmd==="unlock"){
+  waitingPass=true;
   print("password <password>");
   return;
 }
 if(waitingPass){
   if(cmd.startsWith("password ")){
-    if(raw.slice(9) === PASSWORD){
-      locked = false;
-      waitingPass = false;
+    if(raw.slice(9)===PASSWORD){
+      locked=false;
+      waitingPass=false;
       print("ACCESS GRANTED");
       print("Type help");
-    } else {
+    }else{
       print("ACCESS DENIED");
     }
   }
@@ -180,98 +201,108 @@ if(locked){
 
 /* ================= COMMANDS ================= */
 
-if(cmd === "help"){
+if(cmd==="help"){
   print("help, clear, status");
   print("computers, connect <name>");
   print("network map");
   print("hack, progress");
+  print("theme green | red | blue");
   if(isAdmin){
     print("ADMIN: hack terminal <target>, beat");
   }
   return;
 }
 
-if(cmd === "clear"){
-  terminal.textContent = "";
+if(cmd==="clear"){ terminal.textContent=""; return; }
+
+if(cmd==="status"){
+  print("CONNECTED: "+(connected||"NONE"));
+  print("HACKING: "+(hacking?"YES":"NO"));
   return;
 }
 
-if(cmd === "status"){
-  print("CONNECTED: " + (connected || "NONE"));
-  print("HACKING: " + (hacking ? "YES" : "NO"));
+/* THEME COMMAND */
+if(cmd.startsWith("theme ")){
+  const t=cmd.split(" ")[1];
+  if(["green","red","blue"].includes(t)){
+    setTheme(t);
+    print("Theme set to "+t);
+  }else{
+    print("Available themes: green, red, blue");
+  }
   return;
 }
 
 /* COMPUTERS */
-if(cmd === "computers"){
+if(cmd==="computers"){
   print("Available computers:");
-  Object.keys(computers).forEach(c => print("- " + c));
+  Object.keys(computers).forEach(c=>print("- "+c));
   return;
 }
 
 if(cmd.startsWith("connect ")){
-  const c = raw.slice(8);
+  const c=raw.slice(8);
   if(!computers[c]){
     print("Computer not found");
-  } else {
-    connected = c;
-    print("Connected to " + c);
+  }else{
+    connected=c;
+    print("Connected to "+c);
     print("Files:");
-    computers[c].forEach(f => print(" - " + f));
+    computers[c].forEach(f=>print(" - "+f));
   }
   return;
 }
 
 /* NETWORK MAP */
-if(cmd === "network map"){
+if(cmd==="network map"){
   print("NETWORK MAP:");
   print("[terminal]");
-  Object.keys(computers).forEach(c => print("  └─ " + c));
+  Object.keys(computers).forEach(c=>print("  └─ "+c));
   return;
 }
 
 /* HACK */
-if(cmd === "hack"){
+if(cmd==="hack"){
   if(!connected){
     print("Not connected to any computer");
     return;
   }
-  hacking = true;
-  hackProgress = 0;
-  print("Hacking " + connected + "...");
+  hacking=true;
+  hackProgress=0;
+  print("Hacking "+connected+"...");
   return;
 }
 
-if(cmd === "progress"){
+if(cmd==="progress"){
   if(!hacking){
     print("No hack in progress");
     return;
   }
-  hackProgress += 25;
-  print("Progress: " + hackProgress + "%");
-  if(hackProgress >= 100){
-    hacking = false;
+  hackProgress+=25;
+  print("Progress: "+hackProgress+"%");
+  if(hackProgress>=100){
+    hacking=false;
     print("HACK COMPLETE");
   }
   return;
 }
 
-/* ================= ADMIN ================= */
+/* ADMIN */
 if(isAdmin && cmd.startsWith("hack terminal ")){
-  const target = raw.slice(14);
-  print("HACKING TERMINAL: " + target.toUpperCase());
+  const target=raw.slice(14);
+  print("HACKING TERMINAL: "+target.toUpperCase());
   setTimeout(()=>print("ACCESS GRANTED"),800);
   return;
 }
 
-if(isAdmin && cmd === "beat"){
-  terminal.textContent = "";
+if(isAdmin && cmd==="beat"){
+  terminal.textContent="";
   print("=========== YOU WON ===========");
   print("ALL SYSTEMS COMPROMISED");
   return;
 }
 
-/* ================= UNKNOWN ================= */
+/* UNKNOWN */
 print("UNKNOWN COMMAND");
 });
 
