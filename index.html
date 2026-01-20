@@ -43,6 +43,7 @@ body{
   height:100vh;
   display:flex;
   flex-direction:column;
+  overflow:hidden;
 }
 
 /* HEADER */
@@ -53,7 +54,7 @@ body{
   font-size:22px;
 }
 
-/* MAIN LAYOUT */
+/* MAIN */
 #main{
   flex:1;
   display:flex;
@@ -61,31 +62,22 @@ body{
 
 /* SIDEBAR */
 #sidebar{
-  width:220px;
+  width:240px;
   background:var(--panel);
   border-right:2px solid var(--border);
   padding:10px;
-  transition:width 0.3s;
   border-radius:0 16px 16px 0;
+  transition:width .3s;
 }
-#sidebar.collapsed{
-  width:40px;
-}
-#sidebar h3{
-  margin-top:0;
-}
+#sidebar.collapsed{width:40px}
 #sidebar button{
   width:100%;
-  margin:5px 0;
+  margin:6px 0;
   background:transparent;
   color:var(--fg);
   border:1px solid var(--border);
-  padding:5px;
+  padding:6px;
   cursor:pointer;
-}
-#sidebar a{
-  color:var(--fg);
-  text-decoration:none;
 }
 
 /* TERMINAL */
@@ -116,13 +108,57 @@ body{
 /* TASKBAR */
 #taskbar{
   height:32px;
+  background:var(--panel);
   border-top:2px solid var(--border);
   display:flex;
-  justify-content:flex-end;
   align-items:center;
+  justify-content:space-between;
   padding:0 10px;
-  background:var(--panel);
 }
+
+/* BATTERY */
+#battery{
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+#batteryBox{
+  width:22px;
+  height:12px;
+  border:2px solid var(--fg);
+  position:relative;
+}
+#batteryFill{
+  height:100%;
+  width:60%;
+  background:var(--fg);
+}
+#batteryTip{
+  width:3px;
+  height:6px;
+  background:var(--fg);
+  margin-left:2px;
+}
+
+/* WINDOWS */
+.window{
+  position:absolute;
+  top:80px;
+  left:80px;
+  width:260px;
+  background:var(--panel);
+  border:2px solid var(--border);
+  padding:8px;
+  z-index:10;
+}
+.window h3{
+  margin:0 0 6px 0;
+}
+.close{
+  float:right;
+  cursor:pointer;
+}
+.hidden{display:none}
 </style>
 </head>
 
@@ -135,11 +171,13 @@ body{
 <!-- SIDEBAR -->
 <div id="sidebar">
   <button onclick="toggleSidebar()">☰</button>
-  <h3>CREDITS</h3>
-  Creator:
-  <a href="https://github.com/git123hub496" target="_blank">Git123Hub496</a>
 
-  <h3>THEMES</h3>
+  <button onclick="openApp('files')">📁 File Explorer</button>
+  <button onclick="openApp('calc')">🧮 Calculator</button>
+  <button onclick="openApp('about')">🖥️ System Info</button>
+
+  <hr>
+
   <button onclick="setTheme('theme-green')">Green</button>
   <button onclick="setTheme('theme-red')">Red</button>
   <button onclick="setTheme('theme-blue')">Blue</button>
@@ -152,46 +190,55 @@ body{
     <input id="cmd" placeholder="type command...">
   </div>
 </div>
-
 </div>
 
 <!-- TASKBAR -->
 <div id="taskbar">
+  <div id="battery">
+    <div id="batteryBox">
+      <div id="batteryFill"></div>
+    </div>
+    <div id="batteryTip"></div>
+    <span id="batteryPct">60%</span>
+  </div>
   <span id="clock"></span>
 </div>
 
+<!-- WINDOWS -->
+<div id="files" class="window hidden">
+  <span class="close" onclick="closeApp('files')">✖</span>
+  <h3>File Explorer</h3>
+  system.log<br>users.db<br>keys.key
+</div>
+
+<div id="calc" class="window hidden">
+  <span class="close" onclick="closeApp('calc')">✖</span>
+  <h3>Calculator</h3>
+  <input id="calcIn" style="width:100%">
+  <button onclick="doCalc()">=</button>
+  <div id="calcOut"></div>
+</div>
+
+<div id="about" class="window hidden">
+  <span class="close" onclick="closeApp('about')">✖</span>
+  <h3>System Info</h3>
+  FakeOS v5<br>Secure Kernel<br>Status: Stable
+</div>
+
 <script>
+/* TERMINAL */
 const terminal=document.getElementById("terminal");
 const input=document.getElementById("cmd");
-const header=document.getElementById("header");
-
-let username="user";
-let waitingName=true;
-let locked=true;
-let isAdmin=false;
-let connected=null;
-
-const computers={
-  "office-pc":["mail.txt","logs.log"],
-  "server-node":["users.db","keys.key"]
-};
+let username="user", waitingName=true, locked=true, isAdmin=false;
 
 function print(t){
   terminal.textContent+=t+"\n";
   terminal.scrollTop=terminal.scrollHeight;
 }
 function prompt(){
-  return isAdmin ? "ADMIN> " : username+"@terminal> ";
+  return (isAdmin?"ADMIN":"user")+"@terminal> ";
 }
 
-/* BOOT */
-print("Booting Hacking Terminal...");
-setTimeout(()=>{
-  print("SYSTEM ONLINE");
-  print("Enter username: name <yourname>");
-},600);
-
-/* INPUT */
 input.addEventListener("keydown",e=>{
 if(e.key!=="Enter")return;
 const raw=input.value.trim();
@@ -200,81 +247,45 @@ if(!raw)return;
 const cmd=raw.toLowerCase();
 print(prompt()+raw);
 
-/* NAME */
 if(waitingName){
   if(cmd.startsWith("name ")){
     username=raw.slice(5);
     waitingName=false;
     if(username==="admin"){
       isAdmin=true;
-      header.textContent="ADMIN Hacking Terminal";
       document.title="Admin Hacking Terminal";
+      document.getElementById("header").textContent="ADMIN Hacking Terminal";
     }
-    print("Type unlock");
+    print("unlocked");
+    locked=false;
   }
   return;
 }
 
-/* LOCK */
-if(cmd==="unlock"){
-  locked=false;
-  print("ACCESS GRANTED");
-  return;
-}
-if(locked){
-  print("TERMINAL LOCKED");
-  return;
-}
-
-/* COMMANDS */
-if(cmd==="help"){
-  print("scan, hack, progress");
-  print("computers, connect <name>");
-  print("networkmap, status, clear");
-  if(isAdmin) print("ADMIN: hack <target>, beat");
-  return;
-}
-
-if(cmd==="computers"){
-  Object.keys(computers).forEach(c=>print("- "+c));
-  return;
-}
-
-if(cmd.startsWith("connect ")){
-  const c=raw.slice(8);
-  if(computers[c]){
-    connected=c;
-    print("Connected to "+c);
-  }else print("NOT FOUND");
-  return;
-}
-
+if(cmd==="clear"){terminal.textContent="";return;}
+if(cmd==="scan"){print("scan complete");return;}
+if(cmd==="hack"){print("hack in progress");return;}
 if(cmd==="networkmap"){
-  print("[ terminal ]--[ office-pc ]");
-  print("        \\--[ server-node ]");
-  return;
-}
-
-if(cmd==="scan"){ print("Scanning... DONE"); return; }
-if(cmd==="hack"){ print("HACK IN PROGRESS..."); return; }
-if(cmd==="progress"){ print("Progress: 75%"); return; }
-if(cmd==="status"){ print("STATUS: STABLE"); return; }
-if(cmd==="clear"){ terminal.textContent=""; return; }
-
-/* ADMIN */
-if(isAdmin && cmd.startsWith("hack ")){
-  print("HACKING "+raw.slice(5).toUpperCase());
-  print("ACCESS GRANTED");
+  print("[terminal]--[office-pc]");
+  print("        \\--[server]");
   return;
 }
 if(isAdmin && cmd==="beat"){
   terminal.textContent="";
-  print("===== YOU WON =====");
+  print("YOU WON");
   return;
 }
 
-print("UNKNOWN COMMAND");
+print("unknown command");
 });
+
+/* APPS */
+function openApp(id){document.getElementById(id).classList.remove("hidden")}
+function closeApp(id){document.getElementById(id).classList.add("hidden")}
+function doCalc(){
+  document.getElementById("calcOut").textContent=
+    eval(document.getElementById("calcIn").value);
+}
 
 /* SIDEBAR */
 function toggleSidebar(){
@@ -282,18 +293,24 @@ function toggleSidebar(){
 }
 
 /* THEMES */
-function setTheme(t){
-  document.body.className=t;
-}
+function setTheme(t){document.body.className=t}
 
 /* CLOCK */
-function updateClock(){
-  const d=new Date();
+setInterval(()=>{
   document.getElementById("clock").textContent=
-    d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-}
-setInterval(updateClock,1000);
-updateClock();
+    new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+},1000);
+
+/* BATTERY */
+let pct=60, charging=false;
+setInterval(()=>{
+  pct += charging ? 1 : -1;
+  if(pct<=20) charging=true;
+  if(pct>=100) charging=false;
+  document.getElementById("batteryFill").style.width=pct+"%";
+  document.getElementById("batteryPct").textContent=
+    pct+"%"+(charging?" ⚡":"");
+},1500);
 </script>
 
 </body>
