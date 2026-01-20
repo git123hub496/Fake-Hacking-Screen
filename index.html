@@ -58,6 +58,8 @@ input[type="range"]{width:100%;}
     <button onclick="openApp('calc')">🧮</button>
     <button onclick="openApp('about')">🖥️</button>
     <button onclick="openApp('settings')">⚙️</button>
+    <button onclick="openApp('notes')">📝</button>
+    <button onclick="openApp('weather')">🌤️</button>
   </div>
   <div id="status">
     <span id="clock"></span>
@@ -75,10 +77,14 @@ input[type="range"]{width:100%;}
   <button onclick="openApp('calc')">🧮 Calculator</button>
   <button onclick="openApp('about')">🖥️ System</button>
   <button onclick="openApp('settings')">⚙️ Settings</button>
+  <button onclick="openApp('notes')">📝 Notes</button>
+  <button onclick="openApp('weather')">🌤️ Weather</button>
   <hr>
   <button onclick="setTheme('theme-green')">🟢 Green</button>
   <button onclick="setTheme('theme-red')">🔴 Red</button>
   <button onclick="setTheme('theme-blue')">🔵 Blue</button>
+  <hr>
+  <button onclick="saveData()">💾 Save</button>
 </div>
 
 <!-- APP WINDOWS -->
@@ -103,27 +109,36 @@ input[type="range"]{width:100%;}
 <input type="checkbox" id="cheatTrace" onchange="toggleCheat('trace')"> Unlimited Trace<br>
 <input type="checkbox" id="cheatHack" onchange="toggleCheat('hack')"> Instant Hack
 </div>
+<div id="notes" class="window hidden"><span class="close" onclick="closeApp('notes')">✖</span>
+<b>Notes</b><br><br><textarea id="notesText" style="width:100%;height:150px"></textarea>
+</div>
+<div id="weather" class="window hidden"><span class="close" onclick="closeApp('weather')">✖</span>
+<b>Weather</b><br><br>Current weather: 🌤️ Sunny<br>Temperature: 72°F
+</div>
 
 <script>
-// Core variables
+// VARIABLES
 const terminal=document.getElementById("terminal");
 const input=document.getElementById("cmd");
 const header=document.getElementById("header");
 const launcher=document.getElementById("launcher");
 const launcherMenu=document.getElementById("launcherMenu");
-const favicon=document.getElementById("favicon");
 
 let waitingName=true,isAdmin=false,username="user",connected=null,trace=0,startTime=Date.now();
 let cheats={trace:false,hack:false};
-const downloads={};
-const computers={"office-pc":["mail.txt","finance.xls"],"server-node":["users.db","keys.key"]};
+let downloads={}, notesText="";
 
-// BOOT SEQUENCE
+// LOAD FROM LOCAL STORAGE
+if(localStorage.getItem("downloads")) downloads=JSON.parse(localStorage.getItem("downloads"));
+if(localStorage.getItem("notesText")) notesText=localStorage.getItem("notesText");
+document.getElementById("notesText").value=notesText;
+
+// BOOT
 const boot=["Booting Hacking Terminal...","Loading modules...","Initializing UI...","System ready.","","Enter username: name <yourname>"];
 let bi=0;
 const bootInt=setInterval(()=>{print(boot[bi++]);if(bi>=boot.length){clearInterval(bootInt);input.disabled=false;input.placeholder="type command...";}},500);
 
-// TERMINAL FUNCTIONS
+// TERMINAL
 function print(t){terminal.textContent+=t+"\n";terminal.scrollTop=terminal.scrollHeight}
 function prompt(){return (isAdmin?"ADMIN":"user")+"@terminal> "}
 
@@ -143,8 +158,7 @@ input.addEventListener("keydown",e=>{
     return;
   }
 
-  // HELP
-  if(cmd==="help"){print("whoami, date, time, uptime\nscan, hack, progress\ncomputers, connect <name>, disconnect\nls, cat <file>\ndownload <file>, upload <file>\nnetworkmap, mission, credits\nclear"); if(isAdmin) print("ADMIN: shutdown, override, nuke, beat"); return;}
+  if(cmd==="help"){print("whoami, date, time, uptime\nls, cat <file>, download <file>\nnetworkmap, mission, credits, clear"); if(isAdmin) print("ADMIN: shutdown, override, nuke, beat"); return;}
   if(cmd==="whoami"){print(username);return;}
   if(cmd==="date"){print(new Date().toDateString());return;}
   if(cmd==="time"){print(new Date().toLocaleTimeString());return;}
@@ -153,36 +167,17 @@ input.addEventListener("keydown",e=>{
   if(cmd.startsWith("ping ")){print("Pinging "+raw.slice(5)+"... OK");return;}
   if(cmd==="trace"){trace+=cheats.trace?100:10;print("TRACE LEVEL: "+trace+"%");return;}
   if(cmd==="trace reset"){trace=0;print("TRACE RESET");return;}
-  if(cmd==="computers"){Object.keys(computers).forEach(c=>print("- "+c));return;}
-  if(cmd.startsWith("connect ")){const c=raw.slice(8); if(computers[c]){connected=c;print("Connected to "+c)} else print("NOT FOUND"); return;}
-  if(cmd==="disconnect"){connected=null;print("Disconnected");return;}
   
-  // LS shows downloaded files
-  if(cmd==="ls"){let files=Object.keys(downloads); if(files.length===0){print("No files downloaded yet."); return;} files.forEach(f=>print(f));updateFileExplorer(); return;}
-  
-  // CAT reads downloaded files
-  if(cmd.startsWith("cat ")){let f=raw.slice(4).trim(); if(downloads[f]){print(`Reading ${f}...`);print(downloads[f]);} else {print("File not found.");} return;}
-  
-  // DOWNLOAD adds fun file
+  // DOWNLOAD
   if(cmd.startsWith("download ")){
     let f=raw.slice(9).trim();
-    if(!f){print("Specify a file to download!"); return;}
     const funContents=["TOP SECRET DATA: 🕵️‍♂️","Access codes: 42 17 99","Mission log: infiltrated successfully","Random text: qwertyuiopasdfghjkl","Encrypted nonsense: %$#@!*&^"];
     downloads[f]=funContents[Math.floor(Math.random()*funContents.length)];
     print(`Downloading ${f}... DONE`); updateFileExplorer(); return;
   }
 
-  if(cmd.startsWith("upload ")){print("Uploading "+raw.slice(7)+"... DONE");return;}
-  if(cmd.startsWith("encrypt ")){print("Encrypted "+raw.slice(8));return;}
-  if(cmd.startsWith("decrypt ")){print("Decrypted "+raw.slice(8));return;}
-  if(cmd==="networkmap"){print("[terminal]--[office-pc]\n        \\--[server-node]");return;}
-  if(cmd==="mission"){print("MISSION: Infiltrate the system");return;}
-  if(cmd==="credits"){print("Created by Git123Hub496");return;}
-  if(cmd==="hack the planet"){print("ACCESS GRANTED");print("YOU WON");return;}
-  if(isAdmin && cmd==="shutdown"){print("SYSTEM SHUTDOWN");return;}
-  if(isAdmin && cmd==="override"){print("SECURITY OVERRIDDEN");return;}
-  if(isAdmin && cmd==="nuke"){print("💥 SYSTEM DESTROYED");return;}
-  if(isAdmin && cmd==="beat"){terminal.textContent="";print("===== YOU WON =====");return;}
+  if(cmd==="ls"){Object.keys(downloads).forEach(f=>print(f)); updateFileExplorer(); return;}
+  if(cmd.startsWith("cat ")){let f=raw.slice(4).trim(); if(downloads[f]){print(`Reading ${f}...\n${downloads[f]}`);}else{print("File not found.");} return;}
   if(cmd==="clear"){terminal.textContent="";return;}
   print("Unknown command");
 });
@@ -198,7 +193,7 @@ function setTheme(t){document.body.className=t;
   if(t==="theme-blue") launcher.style.filter="hue-rotate(210deg)";
 }
 
-// SETTINGS APP FUNCTIONS
+// SETTINGS
 function updateBrightness(v){document.getElementById('brightnessVal').textContent=v; document.body.style.filter=`brightness(${v}%) contrast(${document.getElementById('contrast').value}%)`;}
 function updateContrast(v){document.getElementById('contrastVal').textContent=v; document.body.style.filter=`brightness(${document.getElementById('brightness').value}%) contrast(${v}%)`;}
 function updateFontSize(v){document.getElementById('fontVal').textContent=v; document.getElementById('terminal').style.fontSize=v+"px";}
@@ -210,15 +205,14 @@ let pct=60,charging=false;
 setInterval(()=>{pct+=charging?1:-1;if(pct<=20) charging=true;if(pct>=100) charging=false;document.getElementById("batteryFill").style.width=pct+"%";document.getElementById("batteryPct").textContent=pct+"%"+(charging?" ⚡":"");},1500);
 
 // DRAGGABLE WINDOWS
-const windows=document.querySelectorAll(".window");
-windows.forEach(win=>{
+document.querySelectorAll(".window").forEach(win=>{
   let offsetX=0,offsetY=0,isDragging=false;
   win.addEventListener("mousedown",e=>{if(e.target.classList.contains("close")) return;isDragging=true;offsetX=e.clientX-win.offsetLeft;offsetY=e.clientY-win.offsetTop;win.style.zIndex=1000;});
   document.addEventListener("mousemove",e=>{if(!isDragging) return; win.style.left=(e.clientX-offsetX)+"px"; win.style.top=(e.clientY-offsetY)+"px";});
   document.addEventListener("mouseup",e=>{isDragging=false;});
 });
 
-// UPDATE FILE EXPLORER
+// FILE EXPLORER
 function updateFileExplorer(){
   const fileList=document.getElementById("fileList");
   fileList.innerHTML="";
@@ -229,6 +223,13 @@ function updateFileExplorer(){
     div.onclick=()=>print(`Reading ${f}...\n${downloads[f]}`);
     fileList.appendChild(div);
   });
+}
+
+// SAVE FUNCTION
+function saveData(){
+  localStorage.setItem("downloads", JSON.stringify(downloads));
+  localStorage.setItem("notesText", document.getElementById("notesText").value);
+  alert("💾 Data saved!");
 }
 </script>
 </body>
