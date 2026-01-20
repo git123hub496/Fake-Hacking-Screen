@@ -95,10 +95,17 @@ body{
   transition:0.2s;
 }
 
+/* Battery moved right with clock */
+#status{
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+
 #battery{
   display:flex;
   align-items:center;
-  gap:6px;
+  gap:4px;
 }
 #batteryBox{
   width:22px;
@@ -125,6 +132,7 @@ body{
   border:2px solid var(--border);
   padding:8px;
   z-index:10;
+  cursor:move;
 }
 .close{
   float:right;
@@ -156,12 +164,14 @@ body{
     <button onclick="setTheme('theme-red')">🔴</button>
     <button onclick="setTheme('theme-blue')">🔵</button>
   </div>
-  <div id="battery">
-    <div id="batteryBox"><div id="batteryFill"></div></div>
-    <div id="batteryTip"></div>
-    <span id="batteryPct">60%</span>
+  <div id="status">
+    <span id="clock"></span>
+    <div id="battery">
+      <div id="batteryBox"><div id="batteryFill"></div></div>
+      <div id="batteryTip"></div>
+      <span id="batteryPct">60%</span>
+    </div>
   </div>
-  <span id="clock"></span>
 </div>
 
 <!-- APP WINDOWS -->
@@ -323,6 +333,7 @@ function closeApp(id){document.getElementById(id).classList.add("hidden")}
 function doCalc(){document.getElementById("calcOut").textContent=eval(document.getElementById("calcIn").value)}
 function setTheme(t){document.body.className=t}
 
+/* CLOCK & BATTERY */
 setInterval(()=>{
   document.getElementById("clock").textContent=
     new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
@@ -336,6 +347,30 @@ setInterval(()=>{
   document.getElementById("batteryFill").style.width=pct+"%";
   document.getElementById("batteryPct").textContent=pct+"%"+(charging?" ⚡":"");
 },1500);
+
+/* DRAGGABLE WINDOWS */
+const windows=document.querySelectorAll(".window");
+windows.forEach(win=>{
+  let offsetX=0, offsetY=0, isDragging=false;
+
+  win.addEventListener("mousedown", e=>{
+    if(e.target.classList.contains("close")) return;
+    isDragging=true;
+    offsetX=e.clientX - win.offsetLeft;
+    offsetY=e.clientY - win.offsetTop;
+    win.style.zIndex=1000; // bring to front
+  });
+
+  document.addEventListener("mousemove", e=>{
+    if(!isDragging) return;
+    win.style.left=(e.clientX - offsetX)+"px";
+    win.style.top=(e.clientY - offsetY)+"px";
+  });
+
+  document.addEventListener("mouseup", e=>{
+    isDragging=false;
+  });
+});
 </script>
 
 </body>
