@@ -6,12 +6,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link id="favicon" rel="icon" href="favicon.png">
 <style>
-:root{
-  --bg:#000; --panel:#001a00; --fg:#00ff66; --border:#00ff66;
-}
+:root{--bg:#000; --panel:#001a00; --fg:#00ff66; --border:#00ff66;}
 .theme-green{--bg:#000;--panel:#001a00;--fg:#00ff66;--border:#00ff66;}
-.theme-red{--bg:#140000;--panel:#260000;--fg:#ff4444;--border:#ff4444;}
 .theme-blue{--bg:#000814;--panel:#001a33;--fg:#33aaff;--border:#33aaff;}
+.theme-red{--bg:#140000;--panel:#260000;--fg:#ff4444;--border:#ff4444;}
 
 body{margin:0;background:var(--bg);color:var(--fg);font-family:monospace;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 #header{text-align:center;padding:10px;border-bottom:2px solid var(--border);font-size:22px;}
@@ -81,8 +79,8 @@ input[type="range"]{width:100%;}
   <button onclick="openApp('weather')">🌤️ Weather</button>
   <hr>
   <button onclick="setTheme('theme-green')">🟢 Green</button>
-  <button onclick="setTheme('theme-red')">🔴 Red</button>
   <button onclick="setTheme('theme-blue')">🔵 Blue</button>
+  <button onclick="setTheme('theme-red')">🔴 Red</button>
   <hr>
   <button onclick="saveData()">💾 Save</button>
 </div>
@@ -158,6 +156,7 @@ input.addEventListener("keydown",e=>{
     return;
   }
 
+  // HELP
   if(cmd==="help"){print("whoami, date, time, uptime\nls, cat <file>, download <file>\nnetworkmap, mission, credits, clear"); if(isAdmin) print("ADMIN: shutdown, override, nuke, beat"); return;}
   if(cmd==="whoami"){print(username);return;}
   if(cmd==="date"){print(new Date().toDateString());return;}
@@ -167,7 +166,15 @@ input.addEventListener("keydown",e=>{
   if(cmd.startsWith("ping ")){print("Pinging "+raw.slice(5)+"... OK");return;}
   if(cmd==="trace"){trace+=cheats.trace?100:10;print("TRACE LEVEL: "+trace+"%");return;}
   if(cmd==="trace reset"){trace=0;print("TRACE RESET");return;}
-  
+
+  // ADMIN COMMANDS
+  if(isAdmin){
+    if(cmd==="shutdown"){print("SYSTEM SHUTDOWN");return;}
+    if(cmd==="override"){print("SECURITY OVERRIDDEN");return;}
+    if(cmd==="nuke"){print("💥 SYSTEM DESTROYED");return;}
+    if(cmd==="beat"){terminal.textContent="";print("===== YOU WON =====");return;}
+  }
+
   // DOWNLOAD
   if(cmd.startsWith("download ")){
     let f=raw.slice(9).trim();
@@ -176,7 +183,9 @@ input.addEventListener("keydown",e=>{
     print(`Downloading ${f}... DONE`); updateFileExplorer(); return;
   }
 
-  if(cmd==="ls"){Object.keys(downloads).forEach(f=>print(f)); updateFileExplorer(); return;}
+  // LS
+  if(cmd==="ls"){updateFileExplorer(); Object.keys(downloads).forEach(f=>print(f)); return;}
+  // CAT
   if(cmd.startsWith("cat ")){let f=raw.slice(4).trim(); if(downloads[f]){print(`Reading ${f}...\n${downloads[f]}`);}else{print("File not found.");} return;}
   if(cmd==="clear"){terminal.textContent="";return;}
   print("Unknown command");
@@ -189,8 +198,8 @@ function doCalc(){document.getElementById("calcOut").textContent=eval(document.g
 function toggleLauncher(){launcherMenu.style.display = launcherMenu.style.display==="flex" ? "none" : "flex";}
 function setTheme(t){document.body.className=t;
   if(t==="theme-green") launcher.style.filter="hue-rotate(90deg)";
-  if(t==="theme-red") launcher.style.filter="hue-rotate(0deg)";
-  if(t==="theme-blue") launcher.style.filter="hue-rotate(210deg)";
+  if(t==="theme-blue") launcher.style.filter="hue-rotate(0deg)";
+  if(t==="theme-red") launcher.style.filter="hue-rotate(210deg)";
 }
 
 // SETTINGS
