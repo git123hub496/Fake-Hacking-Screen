@@ -26,13 +26,12 @@ body{
   font-family:monospace;
 }
 
-/* APP LAYOUT */
 #app{
   display:flex;
   height:100vh;
 }
 
-/* TERMINAL */
+/* MAIN TERMINAL */
 #main{
   flex:1;
   display:flex;
@@ -71,12 +70,12 @@ body{
 
 /* SIDEBAR */
 #sideUI{
-  width:220px;
+  width:230px;
   margin:12px;
   padding:14px;
   background:rgba(0,0,0,0.85);
   border:2px solid var(--border);
-  border-radius:18px;
+  border-radius:20px;
   font-size:14px;
   box-sizing:border-box;
 }
@@ -88,12 +87,33 @@ body{
   padding-bottom:6px;
 }
 
+/* THEME PICKER */
+.themeBtn{
+  width:100%;
+  margin:6px 0;
+  padding:8px;
+  background:black;
+  border:1px solid var(--border);
+  color:var(--fg);
+  font-family:monospace;
+  cursor:pointer;
+  border-radius:12px;
+}
+
+.themeBtn:hover{
+  background:var(--border);
+  color:black;
+}
+
+/* CREDITS */
 #creditLink{
+  display:block;
+  margin-top:10px;
   color:var(--fg);
   text-decoration:none;
   font-weight:bold;
+  text-align:center;
 }
-
 #creditLink:hover{
   text-decoration:underline;
 }
@@ -119,8 +139,12 @@ body{
   </div>
 
   <div id="sideUI">
-    <h3>CREDITS</h3>
-    <div>Creator:</div>
+    <h3>THEMES</h3>
+    <button class="themeBtn" onclick="setTheme('green')">GREEN</button>
+    <button class="themeBtn" onclick="setTheme('red')">RED</button>
+    <button class="themeBtn" onclick="setTheme('blue')">BLUE</button>
+
+    <h3 style="margin-top:14px;">CREDITS</h3>
     <a href="https://github.com/git123hub496" target="_blank" id="creditLink">
       Git123Hub496
     </a>
@@ -251,7 +275,6 @@ if(cmd==="help"){
   print("computers, connect <name>");
   print("network map");
   print("hack, progress");
-  print("theme green | red | blue");
   print("status, clear");
   if(isAdmin) print("ADMIN: hack terminal <target>, beat");
   return;
@@ -264,7 +287,6 @@ if(cmd==="status"){
   print("HACKING: "+(hacking?"YES":"NO"));
   return;
 }
-if(cmd.startsWith("theme ")){ setTheme(cmd.split(" ")[1]); return; }
 
 if(cmd==="computers"){
   Object.keys(computers).forEach(c=>print("- "+c));
