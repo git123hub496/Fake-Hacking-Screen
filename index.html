@@ -5,234 +5,195 @@
 <title>Hacking Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#00ff66">
-
 <link rel="icon" href="favicon.png">
-<link rel="apple-touch-icon" href="favicon.png">
 
 <style>
 :root{
-  --bg1:#001a00;
-  --bg2:#000;
+  --bg:#000;
+  --panel:#001a00;
   --fg:#00ff66;
   --border:#00ff66;
 }
 
+/* THEMES */
+.theme-green{
+  --bg:#000;
+  --panel:#001a00;
+  --fg:#00ff66;
+  --border:#00ff66;
+}
+.theme-red{
+  --bg:#120000;
+  --panel:#220000;
+  --fg:#ff4444;
+  --border:#ff4444;
+}
+.theme-blue{
+  --bg:#000814;
+  --panel:#001a33;
+  --fg:#33aaff;
+  --border:#33aaff;
+}
+
 body{
   margin:0;
-  background:radial-gradient(circle at top,var(--bg1),var(--bg2));
+  background:var(--bg);
   color:var(--fg);
   font-family:monospace;
-}
-
-#app{
-  display:flex;
   height:100vh;
-}
-
-/* MAIN TERMINAL */
-#main{
-  flex:1;
   display:flex;
   flex-direction:column;
 }
 
+/* HEADER */
 #header{
   text-align:center;
-  padding:12px;
-  font-size:22px;
+  padding:10px;
   border-bottom:2px solid var(--border);
+  font-size:22px;
 }
 
+/* MAIN LAYOUT */
+#main{
+  flex:1;
+  display:flex;
+}
+
+/* SIDEBAR */
+#sidebar{
+  width:220px;
+  background:var(--panel);
+  border-right:2px solid var(--border);
+  padding:10px;
+  transition:width 0.3s;
+  border-radius:0 16px 16px 0;
+}
+#sidebar.collapsed{
+  width:40px;
+}
+#sidebar h3{
+  margin-top:0;
+}
+#sidebar button{
+  width:100%;
+  margin:5px 0;
+  background:transparent;
+  color:var(--fg);
+  border:1px solid var(--border);
+  padding:5px;
+  cursor:pointer;
+}
+#sidebar a{
+  color:var(--fg);
+  text-decoration:none;
+}
+
+/* TERMINAL */
+#terminalWrap{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
 #terminal{
   flex:1;
   padding:10px;
   overflow-y:auto;
   white-space:pre-wrap;
-  font-size:18px;
 }
-
 #inputBar{
   border-top:2px solid var(--border);
-  padding:10px;
+  padding:8px;
 }
-
 #cmd{
   width:100%;
   background:black;
   color:var(--fg);
   border:none;
   outline:none;
-  font-size:18px;
-  font-family:monospace;
+  font-size:16px;
 }
 
-/* SIDEBAR */
-#sideUI{
-  width:230px;
-  margin:12px;
-  padding:14px;
-  background:rgba(0,0,0,0.85);
-  border:2px solid var(--border);
-  border-radius:20px;
-  font-size:14px;
-  box-sizing:border-box;
-}
-
-#sideUI h3{
-  margin:0 0 10px 0;
-  text-align:center;
-  border-bottom:1px solid var(--border);
-  padding-bottom:6px;
-}
-
-/* THEME PICKER */
-.themeBtn{
-  width:100%;
-  margin:6px 0;
-  padding:8px;
-  background:black;
-  border:1px solid var(--border);
-  color:var(--fg);
-  font-family:monospace;
-  cursor:pointer;
-  border-radius:12px;
-}
-
-.themeBtn:hover{
-  background:var(--border);
-  color:black;
-}
-
-/* CREDITS */
-#creditLink{
-  display:block;
-  margin-top:10px;
-  color:var(--fg);
-  text-decoration:none;
-  font-weight:bold;
-  text-align:center;
-}
-#creditLink:hover{
-  text-decoration:underline;
-}
-
-/* MOBILE */
-@media (max-width:700px){
-  #app{ flex-direction:column; }
-  #sideUI{ width:auto; }
+/* TASKBAR */
+#taskbar{
+  height:32px;
+  border-top:2px solid var(--border);
+  display:flex;
+  justify-content:flex-end;
+  align-items:center;
+  padding:0 10px;
+  background:var(--panel);
 }
 </style>
 </head>
 
-<body>
+<body class="theme-green">
 
-<div id="app">
+<div id="header">Hacking Terminal</div>
 
-  <div id="main">
-    <div id="header">Hacking Terminal</div>
-    <div id="terminal"></div>
-    <div id="inputBar">
-      <input id="cmd" placeholder="booting..." disabled>
-    </div>
+<div id="main">
+
+<!-- SIDEBAR -->
+<div id="sidebar">
+  <button onclick="toggleSidebar()">☰</button>
+  <h3>CREDITS</h3>
+  Creator:
+  <a href="https://github.com/git123hub496" target="_blank">Git123Hub496</a>
+
+  <h3>THEMES</h3>
+  <button onclick="setTheme('theme-green')">Green</button>
+  <button onclick="setTheme('theme-red')">Red</button>
+  <button onclick="setTheme('theme-blue')">Blue</button>
+</div>
+
+<!-- TERMINAL -->
+<div id="terminalWrap">
+  <div id="terminal"></div>
+  <div id="inputBar">
+    <input id="cmd" placeholder="type command...">
   </div>
+</div>
 
-  <div id="sideUI">
-    <h3>THEMES</h3>
-    <button class="themeBtn" onclick="setTheme('green')">GREEN</button>
-    <button class="themeBtn" onclick="setTheme('red')">RED</button>
-    <button class="themeBtn" onclick="setTheme('blue')">BLUE</button>
+</div>
 
-    <h3 style="margin-top:14px;">CREDITS</h3>
-    <a href="https://github.com/git123hub496" target="_blank" id="creditLink">
-      Git123Hub496
-    </a>
-  </div>
-
+<!-- TASKBAR -->
+<div id="taskbar">
+  <span id="clock"></span>
 </div>
 
 <script>
 const terminal=document.getElementById("terminal");
 const input=document.getElementById("cmd");
 const header=document.getElementById("header");
-const root=document.documentElement;
 
-/* STATE */
-let booting=true;
 let username="user";
-let isAdmin=false;
 let waitingName=true;
 let locked=true;
-let waitingPass=false;
-
+let isAdmin=false;
 let connected=null;
-let hacking=false;
-let hackProgress=0;
 
-const PASSWORD="access123";
-
-/* NETWORK */
 const computers={
-  "office-pc":["emails.txt","budget.xls"],
-  "security-node":["cams.log","doors.cfg"],
-  "space-link":["telemetry.bin","coords.dat"]
+  "office-pc":["mail.txt","logs.log"],
+  "server-node":["users.db","keys.key"]
 };
 
-/* UTILS */
 function print(t){
   terminal.textContent+=t+"\n";
   terminal.scrollTop=terminal.scrollHeight;
 }
 function prompt(){
-  return (isAdmin?"ADMIN":username)+(connected?"@"+connected:"@terminal")+"> ";
-}
-
-/* THEMES */
-function setTheme(t){
-  if(t==="green"){
-    root.style.setProperty("--bg1","#001a00");
-    root.style.setProperty("--fg","#00ff66");
-    root.style.setProperty("--border","#00ff66");
-  }
-  if(t==="red"){
-    root.style.setProperty("--bg1","#1a0000");
-    root.style.setProperty("--fg","#ff3333");
-    root.style.setProperty("--border","#ff3333");
-  }
-  if(t==="blue"){
-    root.style.setProperty("--bg1","#00101a");
-    root.style.setProperty("--fg","#33ccff");
-    root.style.setProperty("--border","#33ccff");
-  }
+  return isAdmin ? "ADMIN> " : username+"@terminal> ";
 }
 
 /* BOOT */
-const bootLines=[
-  "Booting Hacking Terminal...",
-  "Loading kernel...",
-  "Initializing network...",
-  "System ready."
-];
-let bootStep=0;
-(function boot(){
-  if(bootStep<bootLines.length){
-    print(bootLines[bootStep++]);
-    setTimeout(boot,500);
-  }else{
-    booting=false;
-    input.disabled=false;
-    input.placeholder="type command...";
-    print("");
-    print("SYSTEM ONLINE");
-    print("Enter username: name <yourname>");
-  }
-})();
+print("Booting Hacking Terminal...");
+setTimeout(()=>{
+  print("SYSTEM ONLINE");
+  print("Enter username: name <yourname>");
+},600);
 
 /* INPUT */
 input.addEventListener("keydown",e=>{
-if(e.key!=="Enter"||booting)return;
-
+if(e.key!=="Enter")return;
 const raw=input.value.trim();
 input.value="";
 if(!raw)return;
@@ -248,43 +209,29 @@ if(waitingName){
       isAdmin=true;
       header.textContent="ADMIN Hacking Terminal";
       document.title="Admin Hacking Terminal";
-      print("ADMIN MODE ENABLED");
     }
-    print("Welcome "+username);
     print("Type unlock");
   }
   return;
 }
 
-/* UNLOCK */
-if(cmd==="unlock"){ waitingPass=true; print("password <password>"); return; }
-if(waitingPass){
-  if(cmd.startsWith("password ")){
-    if(raw.slice(9)===PASSWORD){
-      locked=false; waitingPass=false;
-      print("ACCESS GRANTED");
-      print("Type help");
-    }else print("ACCESS DENIED");
-  }
+/* LOCK */
+if(cmd==="unlock"){
+  locked=false;
+  print("ACCESS GRANTED");
   return;
 }
-if(locked){ print("TERMINAL LOCKED"); return; }
-
-/* HELP */
-if(cmd==="help"){
-  print("computers, connect <name>");
-  print("network map");
-  print("hack, progress");
-  print("status, clear");
-  if(isAdmin) print("ADMIN: hack terminal <target>, beat");
+if(locked){
+  print("TERMINAL LOCKED");
   return;
 }
 
 /* COMMANDS */
-if(cmd==="clear"){ terminal.textContent=""; return; }
-if(cmd==="status"){
-  print("CONNECTED: "+(connected||"NONE"));
-  print("HACKING: "+(hacking?"YES":"NO"));
+if(cmd==="help"){
+  print("scan, hack, progress");
+  print("computers, connect <name>");
+  print("networkmap, status, clear");
+  if(isAdmin) print("ADMIN: hack <target>, beat");
   return;
 }
 
@@ -292,49 +239,61 @@ if(cmd==="computers"){
   Object.keys(computers).forEach(c=>print("- "+c));
   return;
 }
+
 if(cmd.startsWith("connect ")){
   const c=raw.slice(8);
-  if(!computers[c]) print("Computer not found");
-  else{ connected=c; print("Connected to "+c); }
-  return;
-}
-if(cmd==="network map"){
-  print("[terminal]");
-  Object.keys(computers).forEach(c=>print(" └─ "+c));
-  return;
-}
-if(cmd==="hack"){
-  if(!connected){ print("Not connected"); return; }
-  hacking=true; hackProgress=0;
-  print("Hacking "+connected+"...");
-  return;
-}
-if(cmd==="progress"){
-  if(!hacking){ print("No hack running"); return; }
-  hackProgress+=25;
-  print("Progress: "+hackProgress+"%");
-  if(hackProgress>=100){ hacking=false; print("HACK COMPLETE"); }
+  if(computers[c]){
+    connected=c;
+    print("Connected to "+c);
+  }else print("NOT FOUND");
   return;
 }
 
+if(cmd==="networkmap"){
+  print("[ terminal ]--[ office-pc ]");
+  print("        \\--[ server-node ]");
+  return;
+}
+
+if(cmd==="scan"){ print("Scanning... DONE"); return; }
+if(cmd==="hack"){ print("HACK IN PROGRESS..."); return; }
+if(cmd==="progress"){ print("Progress: 75%"); return; }
+if(cmd==="status"){ print("STATUS: STABLE"); return; }
+if(cmd==="clear"){ terminal.textContent=""; return; }
+
 /* ADMIN */
-if(isAdmin && cmd.startsWith("hack terminal ")){
-  print("HACKING "+raw.slice(14).toUpperCase());
+if(isAdmin && cmd.startsWith("hack ")){
+  print("HACKING "+raw.slice(5).toUpperCase());
+  print("ACCESS GRANTED");
   return;
 }
 if(isAdmin && cmd==="beat"){
   terminal.textContent="";
-  print("=========== YOU WON ===========");
+  print("===== YOU WON =====");
   return;
 }
 
 print("UNKNOWN COMMAND");
 });
 
-/* PWA */
-if("serviceWorker" in navigator){
-  navigator.serviceWorker.register("sw.js");
+/* SIDEBAR */
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("collapsed");
 }
+
+/* THEMES */
+function setTheme(t){
+  document.body.className=t;
+}
+
+/* CLOCK */
+function updateClock(){
+  const d=new Date();
+  document.getElementById("clock").textContent=
+    d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+}
+setInterval(updateClock,1000);
+updateClock();
 </script>
 
 </body>
