@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <title>Hacking Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <link rel="icon" href="favicon.png">
 
 <style>
@@ -16,24 +15,9 @@
 }
 
 /* THEMES */
-.theme-green{
-  --bg:#000;
-  --panel:#001a00;
-  --fg:#00ff66;
-  --border:#00ff66;
-}
-.theme-red{
-  --bg:#120000;
-  --panel:#220000;
-  --fg:#ff4444;
-  --border:#ff4444;
-}
-.theme-blue{
-  --bg:#000814;
-  --panel:#001a33;
-  --fg:#33aaff;
-  --border:#33aaff;
-}
+.theme-green{--bg:#000;--panel:#001a00;--fg:#00ff66;--border:#00ff66;}
+.theme-red{--bg:#140000;--panel:#260000;--fg:#ff4444;--border:#ff4444;}
+.theme-blue{--bg:#000814;--panel:#001a33;--fg:#33aaff;--border:#33aaff;}
 
 body{
   margin:0;
@@ -54,22 +38,21 @@ body{
   font-size:22px;
 }
 
-/* MAIN */
-#main{
-  flex:1;
-  display:flex;
-}
+/* LAYOUT */
+#main{flex:1;display:flex}
 
 /* SIDEBAR */
 #sidebar{
-  width:240px;
+  width:220px;
   background:var(--panel);
   border-right:2px solid var(--border);
   padding:10px;
   border-radius:0 16px 16px 0;
-  transition:width .3s;
+  transition:width .25s;
 }
-#sidebar.collapsed{width:40px}
+#sidebar.collapsed{width:42px}
+#sidebar.collapsed .label{display:none}
+
 #sidebar button{
   width:100%;
   margin:6px 0;
@@ -81,11 +64,7 @@ body{
 }
 
 /* TERMINAL */
-#terminalWrap{
-  flex:1;
-  display:flex;
-  flex-direction:column;
-}
+#terminalWrap{flex:1;display:flex;flex-direction:column}
 #terminal{
   flex:1;
   padding:10px;
@@ -117,47 +96,25 @@ body{
 }
 
 /* BATTERY */
-#battery{
-  display:flex;
-  align-items:center;
-  gap:6px;
-}
+#battery{display:flex;align-items:center;gap:6px}
 #batteryBox{
-  width:22px;
-  height:12px;
-  border:2px solid var(--fg);
-  position:relative;
+  width:22px;height:12px;border:2px solid var(--fg);position:relative
 }
-#batteryFill{
-  height:100%;
-  width:60%;
-  background:var(--fg);
-}
-#batteryTip{
-  width:3px;
-  height:6px;
-  background:var(--fg);
-  margin-left:2px;
-}
+#batteryFill{height:100%;width:60%;background:var(--fg)}
+#batteryTip{width:3px;height:6px;background:var(--fg)}
 
 /* WINDOWS */
 .window{
   position:absolute;
-  top:80px;
-  left:80px;
+  top:90px;
+  left:90px;
   width:260px;
   background:var(--panel);
   border:2px solid var(--border);
   padding:8px;
   z-index:10;
 }
-.window h3{
-  margin:0 0 6px 0;
-}
-.close{
-  float:right;
-  cursor:pointer;
-}
+.close{float:right;cursor:pointer}
 .hidden{display:none}
 </style>
 </head>
@@ -172,48 +129,47 @@ body{
 <div id="sidebar">
   <button onclick="toggleSidebar()">☰</button>
 
-  <button onclick="openApp('files')">📁 File Explorer</button>
-  <button onclick="openApp('calc')">🧮 Calculator</button>
-  <button onclick="openApp('about')">🖥️ System Info</button>
+  <button onclick="openApp('files')">📁 <span class="label">Files</span></button>
+  <button onclick="openApp('calc')">🧮 <span class="label">Calculator</span></button>
+  <button onclick="openApp('about')">🖥️ <span class="label">System</span></button>
 
   <hr>
 
-  <button onclick="setTheme('theme-green')">Green</button>
-  <button onclick="setTheme('theme-red')">Red</button>
-  <button onclick="setTheme('theme-blue')">Blue</button>
+  <button onclick="setTheme('theme-green')">🟢 <span class="label">Green</span></button>
+  <button onclick="setTheme('theme-red')">🔴 <span class="label">Red</span></button>
+  <button onclick="setTheme('theme-blue')">🔵 <span class="label">Blue</span></button>
 </div>
 
 <!-- TERMINAL -->
 <div id="terminalWrap">
   <div id="terminal"></div>
   <div id="inputBar">
-    <input id="cmd" placeholder="type command...">
+    <input id="cmd" placeholder="booting..." disabled>
   </div>
 </div>
+
 </div>
 
 <!-- TASKBAR -->
 <div id="taskbar">
   <div id="battery">
-    <div id="batteryBox">
-      <div id="batteryFill"></div>
-    </div>
+    <div id="batteryBox"><div id="batteryFill"></div></div>
     <div id="batteryTip"></div>
     <span id="batteryPct">60%</span>
   </div>
   <span id="clock"></span>
 </div>
 
-<!-- WINDOWS -->
+<!-- APPS -->
 <div id="files" class="window hidden">
   <span class="close" onclick="closeApp('files')">✖</span>
-  <h3>File Explorer</h3>
+  <b>File Explorer</b><br><br>
   system.log<br>users.db<br>keys.key
 </div>
 
 <div id="calc" class="window hidden">
   <span class="close" onclick="closeApp('calc')">✖</span>
-  <h3>Calculator</h3>
+  <b>Calculator</b><br><br>
   <input id="calcIn" style="width:100%">
   <button onclick="doCalc()">=</button>
   <div id="calcOut"></div>
@@ -221,16 +177,19 @@ body{
 
 <div id="about" class="window hidden">
   <span class="close" onclick="closeApp('about')">✖</span>
-  <h3>System Info</h3>
-  FakeOS v5<br>Secure Kernel<br>Status: Stable
+  <b>System Info</b><br><br>
+  FakeOS v5<br>Status: Stable
 </div>
 
 <script>
-/* TERMINAL */
 const terminal=document.getElementById("terminal");
 const input=document.getElementById("cmd");
-let username="user", waitingName=true, locked=true, isAdmin=false;
+const header=document.getElementById("header");
 
+let waitingName=true, locked=true, isAdmin=false;
+let username="user";
+
+/* TERMINAL UTILS */
 function print(t){
   terminal.textContent+=t+"\n";
   terminal.scrollTop=terminal.scrollHeight;
@@ -239,6 +198,26 @@ function prompt(){
   return (isAdmin?"ADMIN":"user")+"@terminal> ";
 }
 
+/* BOOT */
+const boot=[
+  "Booting Hacking Terminal...",
+  "Loading modules...",
+  "Initializing UI...",
+  "System ready.",
+  "",
+  "Enter username: name <yourname>"
+];
+let i=0;
+const bootInt=setInterval(()=>{
+  print(boot[i++]);
+  if(i>=boot.length){
+    clearInterval(bootInt);
+    input.disabled=false;
+    input.placeholder="type command...";
+  }
+},500);
+
+/* INPUT */
 input.addEventListener("keydown",e=>{
 if(e.key!=="Enter")return;
 const raw=input.value.trim();
@@ -251,48 +230,51 @@ if(waitingName){
   if(cmd.startsWith("name ")){
     username=raw.slice(5);
     waitingName=false;
+    locked=false;
     if(username==="admin"){
       isAdmin=true;
+      header.textContent="ADMIN Hacking Terminal";
       document.title="Admin Hacking Terminal";
-      document.getElementById("header").textContent="ADMIN Hacking Terminal";
     }
-    print("unlocked");
-    locked=false;
+    print("ACCESS GRANTED");
+    print("Type help");
   }
   return;
 }
 
-if(cmd==="clear"){terminal.textContent="";return;}
-if(cmd==="scan"){print("scan complete");return;}
-if(cmd==="hack"){print("hack in progress");return;}
+if(cmd==="help"){
+  print("scan, hack, networkmap");
+  print("clear");
+  if(isAdmin) print("ADMIN: beat");
+  return;
+}
+if(cmd==="scan"){print("Scan complete");return;}
+if(cmd==="hack"){print("Hack in progress...");return;}
 if(cmd==="networkmap"){
   print("[terminal]--[office-pc]");
-  print("        \\--[server]");
+  print("        \\--[server-node]");
   return;
 }
+if(cmd==="clear"){terminal.textContent="";return;}
 if(isAdmin && cmd==="beat"){
   terminal.textContent="";
-  print("YOU WON");
+  print("===== YOU WON =====");
   return;
 }
 
-print("unknown command");
+print("Unknown command");
 });
 
-/* APPS */
+/* UI */
+function toggleSidebar(){
+  document.getElementById("sidebar").classList.toggle("collapsed");
+}
 function openApp(id){document.getElementById(id).classList.remove("hidden")}
 function closeApp(id){document.getElementById(id).classList.add("hidden")}
 function doCalc(){
   document.getElementById("calcOut").textContent=
     eval(document.getElementById("calcIn").value);
 }
-
-/* SIDEBAR */
-function toggleSidebar(){
-  document.getElementById("sidebar").classList.toggle("collapsed");
-}
-
-/* THEMES */
 function setTheme(t){document.body.className=t}
 
 /* CLOCK */
@@ -304,12 +286,11 @@ setInterval(()=>{
 /* BATTERY */
 let pct=60, charging=false;
 setInterval(()=>{
-  pct += charging ? 1 : -1;
+  pct+=charging?1:-1;
   if(pct<=20) charging=true;
   if(pct>=100) charging=false;
   document.getElementById("batteryFill").style.width=pct+"%";
-  document.getElementById("batteryPct").textContent=
-    pct+"%"+(charging?" ⚡":"");
+  document.getElementById("batteryPct").textContent=pct+"%"+(charging?" ⚡":"");
 },1500);
 </script>
 
