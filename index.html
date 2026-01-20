@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <title>Hacking Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" href="favicon.png">
+<link id="favicon" rel="icon" href="favicon.png">
 
 <style>
 :root{
@@ -73,6 +73,19 @@ body{
   padding:0 10px;
 }
 
+#launcher{
+  width:36px;
+  height:36px;
+  border:none;
+  background:url('favicon.png') no-repeat center center;
+  background-size:contain;
+  cursor:pointer;
+  border-radius:6px;
+}
+#launcher:hover{
+  filter:brightness(1.2);
+}
+
 #appbar{
   display:flex;
   align-items:center;
@@ -95,7 +108,6 @@ body{
   transition:0.2s;
 }
 
-/* Battery moved right with clock */
 #status{
   display:flex;
   align-items:center;
@@ -141,6 +153,35 @@ body{
 .hidden{
   display:none;
 }
+
+/* LAUNCHER MENU */
+#launcherMenu{
+  position:absolute;
+  bottom:50px;
+  left:10px;
+  width:200px;
+  background:var(--panel);
+  border:2px solid var(--border);
+  padding:6px;
+  display:none;
+  flex-direction:column;
+  gap:6px;
+  z-index:1000;
+  border-radius:6px;
+}
+#launcherMenu button{
+  background:transparent;
+  border:none;
+  color:var(--fg);
+  text-align:left;
+  padding:4px 6px;
+  cursor:pointer;
+  border-radius:4px;
+}
+#launcherMenu button:hover{
+  background:var(--fg);
+  color:var(--panel);
+}
 </style>
 </head>
 
@@ -156,13 +197,11 @@ body{
 </div>
 
 <div id="taskbar">
+  <button id="launcher" onclick="toggleLauncher()"></button>
   <div id="appbar">
     <button onclick="openApp('files')">📁</button>
     <button onclick="openApp('calc')">🧮</button>
     <button onclick="openApp('about')">🖥️</button>
-    <button onclick="setTheme('theme-green')">🟢</button>
-    <button onclick="setTheme('theme-red')">🔴</button>
-    <button onclick="setTheme('theme-blue')">🔵</button>
   </div>
   <div id="status">
     <span id="clock"></span>
@@ -172,6 +211,17 @@ body{
       <span id="batteryPct">60%</span>
     </div>
   </div>
+</div>
+
+<!-- LAUNCHER MENU -->
+<div id="launcherMenu">
+  <button onclick="openApp('files')">📁 Files</button>
+  <button onclick="openApp('calc')">🧮 Calculator</button>
+  <button onclick="openApp('about')">🖥️ System</button>
+  <hr>
+  <button onclick="setTheme('theme-green')">🟢 Green</button>
+  <button onclick="setTheme('theme-red')">🔴 Red</button>
+  <button onclick="setTheme('theme-blue')">🔵 Blue</button>
 </div>
 
 <!-- APP WINDOWS -->
@@ -199,6 +249,9 @@ body{
 const terminal=document.getElementById("terminal");
 const input=document.getElementById("cmd");
 const header=document.getElementById("header");
+const launcher=document.getElementById("launcher");
+const launcherMenu=document.getElementById("launcherMenu");
+const favicon=document.getElementById("favicon");
 
 let waitingName=true, isAdmin=false;
 let username="user";
@@ -214,6 +267,7 @@ const computers={
 function print(t){terminal.textContent+=t+"\n";terminal.scrollTop=terminal.scrollHeight}
 function prompt(){return (isAdmin?"ADMIN":"user")+"@terminal> "}
 
+/* BOOT SEQUENCE */
 const boot=[
   "Booting Hacking Terminal...",
   "Loading modules...",
@@ -232,6 +286,7 @@ const bootInt=setInterval(()=>{
   }
 },500);
 
+/* TERMINAL INPUT */
 input.addEventListener("keydown",e=>{
   if(e.key!=="Enter")return;
   const raw=input.value.trim();
@@ -255,75 +310,34 @@ input.addEventListener("keydown",e=>{
     return;
   }
 
-  /* HELP */
-  if(cmd==="help"){
-    print("whoami, date, time, uptime");
-    print("scan, hack, progress");
-    print("computers, connect <name>, disconnect");
-    print("ls, cat <file>");
-    print("ping <target>, trace, trace reset");
-    print("download <file>, upload <file>");
-    print("encrypt <file>, decrypt <file>");
-    print("networkmap, mission, credits");
-    print("clear");
-    if(isAdmin) print("ADMIN: shutdown, override, nuke, beat");
-    return;
-  }
-
-  /* BASIC */
+  /* COMMANDS (same as before) */
+  if(cmd==="help"){print("whoami, date, time, uptime\nscan, hack, progress\ncomputers, connect <name>, disconnect\nls, cat <file>\nping <target>, trace, trace reset\ndownload <file>, upload <file>\nencrypt <file>, decrypt <file>\nnetworkmap, mission, credits\nclear");if(isAdmin) print("ADMIN: shutdown, override, nuke, beat"); return;}
   if(cmd==="whoami"){print(username);return}
   if(cmd==="date"){print(new Date().toDateString());return}
   if(cmd==="time"){print(new Date().toLocaleTimeString());return}
   if(cmd==="uptime"){print(Math.floor((Date.now()-startTime)/1000)+"s");return}
   if(cmd.startsWith("echo ")){print(raw.slice(5));return}
-
-  /* NETWORK */
   if(cmd.startsWith("ping ")){print("Pinging "+raw.slice(5)+"... OK");return}
   if(cmd==="trace"){trace+=10;print("TRACE LEVEL: "+trace+"%");return}
   if(cmd==="trace reset"){trace=0;print("TRACE RESET");return}
-
-  /* COMPUTERS */
   if(cmd==="computers"){Object.keys(computers).forEach(c=>print("- "+c));return}
-  if(cmd.startsWith("connect ")){
-    const c=raw.slice(8);
-    if(computers[c]){connected=c;print("Connected to "+c)}
-    else print("NOT FOUND");
-    return;
-  }
+  if(cmd.startsWith("connect ")){const c=raw.slice(8); if(computers[c]){connected=c;print("Connected to "+c)} else print("NOT FOUND"); return;}
   if(cmd==="disconnect"){connected=null;print("Disconnected");return}
-  if(cmd==="ls"){
-    if(!connected){print("Not connected");return}
-    computers[connected].forEach(f=>print(f));return
-  }
-  if(cmd.startsWith("cat ")){
-    if(!connected){print("Not connected");return}
-    print("Reading "+raw.slice(4)+"...");return
-  }
-
-  /* FILE OPS */
+  if(cmd==="ls"){if(!connected){print("Not connected");return} computers[connected].forEach(f=>print(f));return}
+  if(cmd.startsWith("cat ")){if(!connected){print("Not connected");return} print("Reading "+raw.slice(4)+"...");return}
   if(cmd.startsWith("download ")){print("Downloading "+raw.slice(9)+"... DONE");return}
   if(cmd.startsWith("upload ")){print("Uploading "+raw.slice(7)+"... DONE");return}
   if(cmd.startsWith("encrypt ")){print("Encrypted "+raw.slice(8));return}
   if(cmd.startsWith("decrypt ")){print("Decrypted "+raw.slice(8));return}
-
-  /* FUN */
-  if(cmd==="networkmap"){
-    print("[terminal]--[office-pc]");
-    print("        \\--[server-node]");
-    return;
-  }
-  if(cmd==="mission"){print("MISSION: Infiltrate the system");return}
-  if(cmd==="credits"){print("Created by Git123Hub496");return}
-  if(cmd==="hack the planet"){print("ACCESS GRANTED");print("YOU WON");return}
-
-  /* ADMIN */
-  if(isAdmin && cmd==="shutdown"){print("SYSTEM SHUTDOWN");return}
-  if(isAdmin && cmd==="override"){print("SECURITY OVERRIDDEN");return}
-  if(isAdmin && cmd==="nuke"){print("💥 SYSTEM DESTROYED");return}
-  if(isAdmin && cmd==="beat"){terminal.textContent="";print("===== YOU WON =====");return}
-
-  if(cmd==="clear"){terminal.textContent="";return}
-
+  if(cmd==="networkmap"){print("[terminal]--[office-pc]\n        \\--[server-node]"); return;}
+  if(cmd==="mission"){print("MISSION: Infiltrate the system");return;}
+  if(cmd==="credits"){print("Created by Git123Hub496");return;}
+  if(cmd==="hack the planet"){print("ACCESS GRANTED");print("YOU WON");return;}
+  if(isAdmin && cmd==="shutdown"){print("SYSTEM SHUTDOWN");return;}
+  if(isAdmin && cmd==="override"){print("SECURITY OVERRIDDEN");return;}
+  if(isAdmin && cmd==="nuke"){print("💥 SYSTEM DESTROYED");return;}
+  if(isAdmin && cmd==="beat"){terminal.textContent="";print("===== YOU WON =====");return;}
+  if(cmd==="clear"){terminal.textContent="";return;}
   print("Unknown command");
 });
 
@@ -331,7 +345,18 @@ input.addEventListener("keydown",e=>{
 function openApp(id){document.getElementById(id).classList.remove("hidden")}
 function closeApp(id){document.getElementById(id).classList.add("hidden")}
 function doCalc(){document.getElementById("calcOut").textContent=eval(document.getElementById("calcIn").value)}
-function setTheme(t){document.body.className=t}
+
+function toggleLauncher(){
+  launcherMenu.style.display = launcherMenu.style.display==="flex" ? "none" : "flex";
+}
+
+/* THEMES + LAUNCHER COLOR CHANGE */
+function setTheme(t){
+  document.body.className=t;
+  if(t==="theme-green") launcher.style.filter="hue-rotate(90deg)";
+  if(t==="theme-red") launcher.style.filter="hue-rotate(0deg)";
+  if(t==="theme-blue") launcher.style.filter="hue-rotate(210deg)";
+}
 
 /* CLOCK & BATTERY */
 setInterval(()=>{
