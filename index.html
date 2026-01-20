@@ -55,19 +55,62 @@ body{
   font-size:18px;
   font-family:monospace;
 }
-  #sideUI{
-  position:fixed;
-  right:0;
-  top:0;
-  width:180px;
-  height:100%;
-  border-left:2px solid var(--border);
+/* LAYOUT WRAPPER */
+#app{
+  display:flex;
+  height:100vh;
+}
+
+/* TERMINAL AREA */
+#main{
+  flex:1;
+  display:flex;
+  flex-direction:column;
+}
+
+/* SIDEBAR */
+#sideUI{
+  width:200px;
+  margin:10px;
+  padding:12px;
   background:rgba(0,0,0,0.85);
+  border:2px solid var(--border);
+  border-radius:16px;
   color:var(--fg);
   font-size:14px;
-  padding:10px;
   box-sizing:border-box;
 }
+
+#sideUI h3{
+  margin:0 0 10px 0;
+  text-align:center;
+  font-size:16px;
+  border-bottom:1px solid var(--border);
+  padding-bottom:6px;
+}
+
+/* CREDIT LINK */
+#creditLink{
+  color:var(--fg);
+  text-decoration:none;
+  font-weight:bold;
+}
+
+#creditLink:hover{
+  text-decoration:underline;
+}
+
+/* MOBILE */
+@media (max-width: 700px){
+  #app{
+    flex-direction:column;
+  }
+  #sideUI{
+    width:auto;
+    margin:10px;
+  }
+}
+
 
 #sideUI h3{
   margin:0 0 10px 0;
@@ -75,11 +118,6 @@ body{
   text-align:center;
   border-bottom:1px solid var(--border);
   padding-bottom:6px;
-}
-
-/* make room for sidebar */
-body{
-  padding-right:180px;
 }
 
 /* mobile adjustment */
