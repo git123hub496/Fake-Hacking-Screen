@@ -4,13 +4,13 @@
 <meta charset="UTF-8">
 <title>Hacking Terminal</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link id="favicon" rel="icon" href="favicon.png">
+<link id="favicon" rel="icon" href="favicon-green.png">
 <style>
 :root{--bg:#000; --panel:#001a00; --fg:#00ff66; --border:#00ff66;}
-/* THEME COLORS FIXED: Blue & Green flipped */
-.theme-blue{--bg:#000;--panel:#001a00;--fg:#00ff66;--border:#00ff66;} /* Was green */
-.theme-green{--bg:#000814;--panel:#001a33;--fg:#33aaff;--border:#33aaff;} /* Was blue */
-.theme-red{--bg:#140000;--panel:#260000;--fg:#ff4444;--border:#ff4444;} /* stays */
+/* THEME COLORS: blue & green swapped */
+.theme-blue{--bg:#000;--panel:#001a00;--fg:#00ff66;--border:#00ff66;} /* green was here */
+.theme-green{--bg:#000814;--panel:#001a33;--fg:#33aaff;--border:#33aaff;} /* blue was here */
+.theme-red{--bg:#140000;--panel:#260000;--fg:#ff4444;--border:#ff4444;}
 
 body{margin:0;background:var(--bg);color:var(--fg);font-family:monospace;height:100vh;display:flex;flex-direction:column;overflow:hidden;}
 #header{text-align:center;padding:10px;border-bottom:2px solid var(--border);font-size:22px;}
@@ -20,7 +20,7 @@ body{margin:0;background:var(--bg);color:var(--fg);font-family:monospace;height:
 #cmd{width:100%;background:black;color:var(--fg);border:none;outline:none;font-size:16px;}
 
 #taskbar{height:50px;background:var(--panel);border-top:2px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 10px;}
-#launcher{width:36px;height:36px;border:none;background:url('favicon.png') no-repeat center/contain;cursor:pointer;border-radius:6px;}
+#launcher{width:36px;height:36px;border:none;background:url('favicon-green.png') no-repeat center/contain;cursor:pointer;border-radius:6px;}
 #launcher:hover{filter:brightness(1.2);}
 #appbar{display:flex;align-items:center;gap:12px;}
 #appbar button{background:transparent;border:none;color:var(--fg);font-size:22px;cursor:pointer;padding:4px 6px;border-radius:6px;}
@@ -111,10 +111,11 @@ const input=document.getElementById("cmd");
 const header=document.getElementById("header");
 const launcher=document.getElementById("launcher");
 const launcherMenu=document.getElementById("launcherMenu");
+const favicon = document.getElementById("favicon");
 
 let waitingName=true,isAdmin=false,username="user",connected=null,trace=0,startTime=Date.now();
 let cheats={trace:false,hack:false};
-let downloads={}, notesText="";
+let downloads={};
 const availableFiles=["secret.txt","codes.key","mission.log","data.db","passwords.txt"];
 
 // LOAD FROM LOCAL STORAGE
@@ -200,10 +201,20 @@ function openApp(id){document.getElementById(id).classList.remove("hidden")}
 function closeApp(id){document.getElementById(id).classList.add("hidden")}
 function doCalc(){document.getElementById("calcOut").textContent=eval(document.getElementById("calcIn").value)}
 function toggleLauncher(){launcherMenu.style.display = launcherMenu.style.display==="flex" ? "none" : "flex";}
-function setTheme(t){document.body.className=t;
-  if(t==="theme-blue") launcher.style.filter="hue-rotate(90deg)";
-  if(t==="theme-green") launcher.style.filter="hue-rotate(0deg)";
-  if(t==="theme-red") launcher.style.filter="hue-rotate(210deg)";
+
+// THEME & ICON SWITCH
+function setTheme(t){
+    document.body.className = t;
+    if(t === "theme-blue"){
+        launcher.style.backgroundImage = "url('favicon-blue.png')";
+        favicon.href = "favicon-blue.png";
+    } else if(t === "theme-green"){
+        launcher.style.backgroundImage = "url('favicon-green.png')";
+        favicon.href = "favicon-green.png";
+    } else if(t === "theme-red"){
+        launcher.style.backgroundImage = "url('favicon-red.png')";
+        favicon.href = "favicon-red.png";
+    }
 }
 
 // SETTINGS
