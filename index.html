@@ -197,8 +197,8 @@ function closeApp(id){document.getElementById(id).classList.add("hidden")}
 function doCalc(){document.getElementById("calcOut").textContent=eval(document.getElementById("calcIn").value)}
 function toggleLauncher(){launcherMenu.style.display = launcherMenu.style.display==="flex" ? "none" : "flex";}
 function setTheme(t){document.body.className=t;
-  if(t==="theme-green") launcher.style.filter="hue-rotate(90deg)";
-  if(t==="theme-blue") launcher.style.filter="hue-rotate(0deg)";
+  if(t==="theme-green") launcher.style.filter="hue-rotate(0deg)";
+  if(t==="theme-blue") launcher.style.filter="hue-rotate(90deg)";
   if(t==="theme-red") launcher.style.filter="hue-rotate(210deg)";
 }
 
