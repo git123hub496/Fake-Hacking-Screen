@@ -126,7 +126,7 @@ let waitingName=true,isAdmin=false,username="user",connected=false,trace=0,start
 let cheats={trace:false,hack:false};
 let downloads={}, notesText="";
 
-// PREMADE FILES WITH UNIQUE CONTENT
+// PREMADE FILES
 const availableFiles=[
   {name:"secret.txt", content:"TOP SECRET: Agent 47 infiltrated the server."},
   {name:"codes.key", content:"Access Code: ZX-42-99-YT"},
@@ -165,57 +165,50 @@ input.addEventListener("keydown",e=>{
     return;
   }
 
-  if(cmd==="help"){print("whoami, date, time, uptime\nls, cat <file>, download <file>, connect\nnetworkmap, mission, credits, clear"); if(isAdmin) print("ADMIN: shutdown, override, nuke, beat"); return;}
-  if(cmd==="whoami"){print(username);return;}
-  if(cmd==="date"){print(new Date().toDateString());return;}
-  if(cmd==="time"){print(new Date().toLocaleTimeString());return;}
-  if(cmd==="uptime"){print(Math.floor((Date.now()-startTime)/1000)+"s");return;}
-  if(cmd.startsWith("echo ")){print(raw.slice(5));return;}
-  if(cmd.startsWith("ping ")){print("Pinging "+raw.slice(5)+"... OK");return;}
-  if(cmd==="trace"){trace+=cheats.trace?100:10;print("TRACE LEVEL: "+trace+"%");return;}
-  if(cmd==="trace reset"){trace=0;print("TRACE RESET");return;}
-
-  if(isAdmin){
-    if(cmd==="shutdown"){print("SYSTEM SHUTDOWN");return;}
-    if(cmd==="override"){print("SECURITY OVERRIDDEN");return;}
-    if(cmd==="nuke"){print("💥 SYSTEM DESTROYED");return;}
-    if(cmd==="beat"){terminal.textContent="";print("===== YOU WON =====");return;}
+  switch(cmd){
+    case "help":
+      print("whoami, date, time, uptime\nls, cat <file>, download <file>, connect\nnetworkmap, mission, credits, clear");
+      if(isAdmin) print("ADMIN: shutdown, override, nuke, beat");
+      break;
+    case "whoami": print(username); break;
+    case "date": print(new Date().toDateString()); break;
+    case "time": print(new Date().toLocaleTimeString()); break;
+    case "uptime": print(Math.floor((Date.now()-startTime)/1000)+"s"); break;
+    case "trace": trace+=cheats.trace?100:10; print("TRACE LEVEL: "+trace+"%"); break;
+    case "trace reset": trace=0; print("TRACE RESET"); break;
+    case "connect": connected=true; print("Connected to server! You can now download files."); break;
+    case "ls":
+      print("Available files to download:");
+      availableFiles.forEach(f=>print(`- ${f.name}`));
+      print("\nDownloaded files:");
+      Object.keys(downloads).forEach(f=>print(`- ${f}`));
+      break;
+    case "clear": terminal.textContent=""; break;
+    default:
+      if(cmd.startsWith("echo ")) print(raw.slice(5));
+      else if(cmd.startsWith("ping ")) print("Pinging "+raw.slice(5)+"... OK");
+      else if(cmd.startsWith("cat ")){
+        let f=raw.slice(4).trim(); 
+        if(downloads[f]) print(`Reading ${f}...\n${downloads[f]}`);
+        else print("File not found.");
+      }
+      else if(cmd.startsWith("download ")){
+        if(!connected){print("Error: Not connected to server."); return;}
+        let fname=raw.slice(9).trim();
+        const fileObj=availableFiles.find(f=>f.name===fname);
+        if(!fileObj){print("File not found."); return;}
+        downloads[fname]=fileObj.content;
+        print(`Downloading ${fname}... DONE`);
+        updateFileExplorer();
+      }
+      else if(isAdmin){
+        if(cmd==="shutdown"){print("SYSTEM SHUTDOWN");}
+        else if(cmd==="override"){print("SECURITY OVERRIDDEN");}
+        else if(cmd==="nuke"){print("💥 SYSTEM DESTROYED");}
+        else if(cmd==="beat"){terminal.textContent=""; print("===== YOU WON =====");}
+        else print("Unknown command");
+      } else print("Unknown command");
   }
-
-  // CONNECT
-  if(cmd==="connect"){connected=true;print("Connected to server! You can now download files."); return;}
-
-  // LS
-  if(cmd==="ls"){
-    print("Available files to download:");
-    availableFiles.forEach(f=>print(`- ${f.name}`));
-    print("\nDownloaded files:");
-    Object.keys(downloads).forEach(f=>print(`- ${f}`));
-    return;
-  }
-
-  // DOWNLOAD
-  if(cmd.startsWith("download ")){
-    if(!connected){print("Error: Not connected to server."); return;}
-    let fname=raw.slice(9).trim();
-    const fileObj=availableFiles.find(f=>f.name===fname);
-    if(!fileObj){print("File not found."); return;}
-    downloads[fname]=fileObj.content;
-    print(`Downloading ${fname}... DONE`);
-    updateFileExplorer();
-    return;
-  }
-
-  // CAT
-  if(cmd.startsWith("cat ")){
-    let f=raw.slice(4).trim(); 
-    if(downloads[f]){print(`Reading ${f}...\n${downloads[f]}`);}
-    else{print("File not found.");} 
-    return;
-  }
-
-  if(cmd==="clear"){terminal.textContent="";return;}
-  print("Unknown command");
 });
 
 // UI FUNCTIONS
