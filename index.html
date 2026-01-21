@@ -122,11 +122,20 @@ const header=document.getElementById("header");
 const launcher=document.getElementById("launcher");
 const launcherMenu=document.getElementById("launcherMenu");
 
-let waitingName=true,isAdmin=false,username="user",connected=null,trace=0,startTime=Date.now();
+let waitingName=true,isAdmin=false,username="user",connected=false,trace=0,startTime=Date.now();
 let cheats={trace:false,hack:false};
 let downloads={}, notesText="";
 
-// LOAD FROM LOCAL STORAGE
+// AVAILABLE FILES
+const availableFiles=[
+  {name:"secret.txt", encrypted:true},
+  {name:"codes.key", encrypted:false},
+  {name:"mission.log", encrypted:true},
+  {name:"data.db", encrypted:false},
+  {name:"passwords.txt", encrypted:true}
+];
+
+// LOAD LOCAL STORAGE
 if(localStorage.getItem("downloads")) downloads=JSON.parse(localStorage.getItem("downloads"));
 if(localStorage.getItem("notesText")) notesText=localStorage.getItem("notesText");
 document.getElementById("notesText").value=notesText;
@@ -136,7 +145,7 @@ const boot=["Booting Hacking Terminal...","Loading modules...","Initializing UI.
 let bi=0;
 const bootInt=setInterval(()=>{print(boot[bi++]);if(bi>=boot.length){clearInterval(bootInt);input.disabled=false;input.placeholder="type command...";}},500);
 
-// TERMINAL
+// TERMINAL FUNCTIONS
 function print(t){terminal.textContent+=t+"\n";terminal.scrollTop=terminal.scrollHeight}
 function prompt(){return (isAdmin?"ADMIN":"user")+"@terminal> "}
 
@@ -151,12 +160,11 @@ input.addEventListener("keydown",e=>{
   if(waitingName){
     if(cmd.startsWith("name ")){username=raw.slice(5);waitingName=false;
       if(username==="admin"){isAdmin=true;header.textContent="ADMIN Hacking Terminal";document.title="Admin Hacking Terminal";}
-      print("ACCESS GRANTED"); print("Type help");
+      print("ACCESS GRANTED"); print("Type help"); connected=true;
     }
     return;
   }
 
-  // HELP
   if(cmd==="help"){print("whoami, date, time, uptime\nls, cat <file>, download <file>\nnetworkmap, mission, credits, clear"); if(isAdmin) print("ADMIN: shutdown, override, nuke, beat"); return;}
   if(cmd==="whoami"){print(username);return;}
   if(cmd==="date"){print(new Date().toDateString());return;}
@@ -167,7 +175,6 @@ input.addEventListener("keydown",e=>{
   if(cmd==="trace"){trace+=cheats.trace?100:10;print("TRACE LEVEL: "+trace+"%");return;}
   if(cmd==="trace reset"){trace=0;print("TRACE RESET");return;}
 
-  // ADMIN COMMANDS
   if(isAdmin){
     if(cmd==="shutdown"){print("SYSTEM SHUTDOWN");return;}
     if(cmd==="override"){print("SECURITY OVERRIDDEN");return;}
@@ -175,18 +182,37 @@ input.addEventListener("keydown",e=>{
     if(cmd==="beat"){terminal.textContent="";print("===== YOU WON =====");return;}
   }
 
-  // DOWNLOAD
-  if(cmd.startsWith("download ")){
-    let f=raw.slice(9).trim();
-    const funContents=["TOP SECRET DATA: 🕵️‍♂️","Access codes: 42 17 99","Mission log: infiltrated successfully","Random text: qwertyuiopasdfghjkl","Encrypted nonsense: %$#@!*&^"];
-    downloads[f]=funContents[Math.floor(Math.random()*funContents.length)];
-    print(`Downloading ${f}... DONE`); updateFileExplorer(); return;
+  // LS: show available files and downloaded files
+  if(cmd==="ls"){
+    print("Available files to download:");
+    availableFiles.forEach(f=>print(`- ${f.name}${f.encrypted?" (Encrypted)":""}`));
+    print("\nDownloaded files:");
+    Object.keys(downloads).forEach(f=>print(`- ${f}`));
+    return;
   }
 
-  // LS
-  if(cmd==="ls"){updateFileExplorer(); Object.keys(downloads).forEach(f=>print(f)); return;}
+  // DOWNLOAD
+  if(cmd.startsWith("download ")){
+    if(!connected){print("Error: Not connected to server."); return;}
+    let fname=raw.slice(9).trim();
+    const fileObj=availableFiles.find(f=>f.name===fname);
+    if(!fileObj){print("File not found."); return;}
+    // simulate decryption for encrypted files
+    let content=fileObj.encrypted ? `DECRYPTED CONTENT OF ${fname}` : `CONTENT OF ${fname}`;
+    downloads[fname]=content;
+    print(`Downloading ${fname}... DONE`);
+    updateFileExplorer();
+    return;
+  }
+
   // CAT
-  if(cmd.startsWith("cat ")){let f=raw.slice(4).trim(); if(downloads[f]){print(`Reading ${f}...\n${downloads[f]}`);}else{print("File not found.");} return;}
+  if(cmd.startsWith("cat ")){
+    let f=raw.slice(4).trim(); 
+    if(downloads[f]){print(`Reading ${f}...\n${downloads[f]}`);}
+    else{print("File not found.");} 
+    return;
+  }
+
   if(cmd==="clear"){terminal.textContent="";return;}
   print("Unknown command");
 });
@@ -196,11 +222,7 @@ function openApp(id){document.getElementById(id).classList.remove("hidden")}
 function closeApp(id){document.getElementById(id).classList.add("hidden")}
 function doCalc(){document.getElementById("calcOut").textContent=eval(document.getElementById("calcIn").value)}
 function toggleLauncher(){launcherMenu.style.display = launcherMenu.style.display==="flex" ? "none" : "flex";}
-function setTheme(t){document.body.className=t;
-  if(t==="theme-green") launcher.style.filter="hue-rotate(0deg)";
-  if(t==="theme-blue") launcher.style.filter="hue-rotate(90deg)";
-  if(t==="theme-red") launcher.style.filter="hue-rotate(210deg)";
-}
+function setTheme(t){document.body.className=t;}
 
 // SETTINGS
 function updateBrightness(v){document.getElementById('brightnessVal').textContent=v; document.body.style.filter=`brightness(${v}%) contrast(${document.getElementById('contrast').value}%)`;}
